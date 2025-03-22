@@ -47,4 +47,35 @@ return require("lazy").setup({
       },
     },
   },
+
+  -- Mason core plugin
+  {
+    "williamboman/mason.nvim",
+    cmd = "Mason",          -- lazy-load on :Mason
+    keys = {
+      { "<leader>m", "<cmd>Mason<CR>", desc = "Open Mason" },
+    },
+    config = function()
+      require("mason").setup()
+    end,
+  },
+
+  -- (Optional) mason-lspconfig if you want LSP integration
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    config = function()
+      require("mason-lspconfig").setup()
+    end,
+  },
+
+  -- (Optional) mason-null-ls if you want formatters/linters
+  {
+    "jay-babu/mason-null-ls.nvim",
+    dependencies = { "williamboman/mason.nvim", "jose-elias-alvarez/null-ls.nvim" },
+    config = function()
+      require("mason-null-ls").setup()
+    end,
+  },
+
 })
