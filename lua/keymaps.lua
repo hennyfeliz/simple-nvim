@@ -11,3 +11,10 @@ map("n", "<leader>fh", function() require("telescope.builtin").help_tags() end, 
 map("n", "<leader>fe", function()
   require("telescope").extensions.file_browser.file_browser()
 end, { desc = "File browser" })
+
+-- bufferline work keys
+vim.keymap.set('n', '<S-h>', '<Cmd>BufferLineCyclePrev<CR>', { desc = 'Prev buffer' })
+vim.keymap.set('n', '<S-l>', '<Cmd>BufferLineCycleNext<CR>', { desc = 'Next buffer' })
+
+
+
