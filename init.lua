@@ -26,6 +26,8 @@ require("keymaps")
 -- 3. (Optional) Set some basic options or keymaps here
 --    e.g.:
 -- Set <leader> to space
+vim.opt.nu = true
+vim.opt.relativenumber = true
 
 -- vim.o.number = true
 -- vim.keymap.set("n", "<Space>", "", { noremap = true })
