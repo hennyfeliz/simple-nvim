@@ -161,30 +161,45 @@ return require("lazy").setup({
 		end,
 	},
 
-	-- -- add tsserver and setup with typescript.nvim instead of lspconfig
-	-- {
-	-- 	"neovim/nvim-lspconfig",
-	-- 	dependencies = {
-	-- 		"jose-elias-alvarez/typescript.nvim",
-	-- 	},
-	-- 	opts = {
-	-- 		servers = {
-	-- 			tsserver = {
-	-- 				-- don't call setup manually!
-	-- 				-- tsserver will use typescript.nvim internally
-	-- 				settings = {},
-	-- 				on_attach = function(_, bufnr)
-	-- 					vim.keymap.set(
-	-- 						"n",
-	-- 						"<leader>co",
-	-- 						"<cmd>TypescriptOrganizeImports<CR>",
-	-- 						{ buffer = bufnr, desc = "Organize Imports" }
-	-- 					)
-	-- 					vim.keymap.set("n", "<leader>cR", "<cmd>TypescriptRenameFile<CR>", { buffer = bufnr, desc = "Rename File" })
-	-- 				end,
-	-- 			},
-	-- 			jdtls = {},
-	-- 		},
-	-- 	},
-	-- },
+	-- nvim web devicons
+	{ "nvim-tree/nvim-web-devicons", opts = {} },
+
+	-- truble for errors and warnings debugging
+	{
+		"folke/trouble.nvim",
+		opts = {}, -- for default options, refer to the configuration section for custom setup.
+		cmd = "Trouble",
+		keys = {
+			{
+				"<leader>xx",
+				"<cmd>Trouble diagnostics toggle<cr>",
+				desc = "Diagnostics (Trouble)",
+			},
+			{
+				"<leader>xX",
+				"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+				desc = "Buffer Diagnostics (Trouble)",
+			},
+			{
+				"<leader>cs",
+				"<cmd>Trouble symbols toggle focus=false<cr>",
+				desc = "Symbols (Trouble)",
+			},
+			{
+				"<leader>cl",
+				"<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+				desc = "LSP Definitions / references / ... (Trouble)",
+			},
+			{
+				"<leader>xL",
+				"<cmd>Trouble loclist toggle<cr>",
+				desc = "Location List (Trouble)",
+			},
+			{
+				"<leader>xQ",
+				"<cmd>Trouble qflist toggle<cr>",
+				desc = "Quickfix List (Trouble)",
+			},
+		},
+	},
 })
