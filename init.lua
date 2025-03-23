@@ -22,6 +22,7 @@ vim.opt.rtp:prepend(lazypath)
 require("plugins")
 require("keymaps")
 require("config")
+require("java")
 
 -- 3. (Optional) Set some basic options or keymaps here
 --    e.g.:
