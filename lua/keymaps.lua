@@ -47,3 +47,8 @@ vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show Diagn
 
 -- List all diagnostics with Telescope
 vim.keymap.set("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "List Diagnostics" })
+
+-- Copy text to " register
+vim.keymap.set("n", "<leader>y", '"+y', { desc = 'Yank into " register' })
+vim.keymap.set("v", "<leader>y", '"+y', { desc = 'Yank into " register' })
+vim.keymap.set("n", "<leader>Y", '"+Y', { desc = 'Yank into " register' })
