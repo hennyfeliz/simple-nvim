@@ -3,21 +3,21 @@ local map = vim.keymap.set
 
 -- Telescope’s built-in pickers
 map("n", "<leader>ff", function()
-	require("telescope.builtin").find_files()
+  require("telescope.builtin").find_files()
 end, { desc = "Find files" })
 map("n", "<leader>fg", function()
-	require("telescope.builtin").live_grep()
+  require("telescope.builtin").live_grep()
 end, { desc = "Live grep" })
 map("n", "<leader>fb", function()
-	require("telescope.builtin").buffers()
+  require("telescope.builtin").buffers()
 end, { desc = "List buffers" })
 map("n", "<leader>fh", function()
-	require("telescope.builtin").help_tags()
+  require("telescope.builtin").help_tags()
 end, { desc = "Help tags" })
 
 -- File browser extension
 map("n", "<leader>fe", function()
-	require("telescope").extensions.file_browser.file_browser()
+  require("telescope").extensions.file_browser.file_browser()
 end, { desc = "File browser" })
 
 -- bufferline work keys
@@ -27,13 +27,13 @@ map("n", "<leader>z", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
 
 -- format code
 map({ "n", "v" }, "<leader>f", function()
-	require("conform").format({ async = true, lsp_fallback = true })
+  require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Format file or range" })
 
 -- FORMAT CODE KEYBINDS
 --
 map({ "n", "v" }, "<leader>f", function()
-	require("conform").format({ async = true, lsp_fallback = true })
+  require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Format file or range" })
 
 --
@@ -52,3 +52,11 @@ vim.keymap.set("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "Li
 vim.keymap.set("n", "<leader>y", '"+y', { desc = 'Yank into " register' })
 vim.keymap.set("v", "<leader>y", '"+y', { desc = 'Yank into " register' })
 vim.keymap.set("n", "<leader>Y", '"+Y', { desc = 'Yank into " register' })
+
+-- LSP Nav keymaps
+vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs" })
+vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
+vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { desc = "List References" })
+vim.keymap.set("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" })
+--
