@@ -18,3 +18,29 @@ Mason installed plugins
     ◍ stylua
     ◍ ts-standard
 
+
+# Apps that you should install with scoop:
+
+```
+scoop bucket add extra
+```
+
+```
+scoop install extras/lazygit
+```
+
+```
+scoop install main/ripgrep
+```
+
+```
+scoop install version/nodejs20
+```
+
+```
+scoop install main/gcc
+```
+
+```
+scoop install main/clangd
+```
