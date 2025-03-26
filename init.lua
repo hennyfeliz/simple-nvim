@@ -1,5 +1,8 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+-- vim.opt.swapfile = true
+-- vim.opt.directory = os.getenv("HOME") .. "/.config/nvim/swap//"
+vim.opt.swapfile = false
 
 vim.env.PATH = "C:/Users/henny/scoop/persist/nodejs/bin;" .. vim.env.PATH
 
