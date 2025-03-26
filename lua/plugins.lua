@@ -483,6 +483,11 @@ return require("lazy").setup({
   },
 
   {
+    "jose-elias-alvarez/nvim-lsp-ts-utils",
+    dependencies = { "nvim-lua/plenary.nvim" },
+  },
+
+  {
     "neovim/nvim-lspconfig",
     dependencies = {
       "stevearc/conform.nvim",
@@ -526,7 +531,12 @@ return require("lazy").setup({
             require("lspconfig").emmet_ls.setup({
               capabilities = capabilities,
               filetypes = {
-                "html", "css", "scss", "javascriptreact", "typescriptreact", "vue",
+                "html",
+                "css",
+                "scss",
+                "javascriptreact",
+                "typescriptreact",
+                "vue",
               },
               init_options = {
                 html = {
@@ -537,7 +547,6 @@ return require("lazy").setup({
               },
             })
           end,
-
 
           ["lua_ls"] = function()
             require("lspconfig").lua_ls.setup({
@@ -579,10 +588,13 @@ return require("lazy").setup({
           "--stdio",
         },
       })
+
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)
           local c = vim.lsp.get_client_by_id(args.data.client_id)
-          if not c then return end
+          if not c then
+            return
+          end
 
           -- Format on save (you already have this)
           if vim.bo.filetype == "lua" then
@@ -601,12 +613,19 @@ return require("lazy").setup({
 
           -- vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition,
           --   vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
-          vim.keymap.set("n", "J", vim.lsp.buf.definition,
-            vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
-          vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references,
-            vim.tbl_extend("force", opts, { desc = "Find References" }))
-          vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation,
-            vim.tbl_extend("force", opts, { desc = "Go to Implementation" }))
+          vim.keymap.set("n", "J", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
+          vim.keymap.set(
+            "n",
+            "<leader>gr",
+            vim.lsp.buf.references,
+            vim.tbl_extend("force", opts, { desc = "Find References" })
+          )
+          vim.keymap.set(
+            "n",
+            "<leader>gi",
+            vim.lsp.buf.implementation,
+            vim.tbl_extend("force", opts, { desc = "Go to Implementation" })
+          )
           vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover Docs" }))
         end,
       })
@@ -806,7 +825,7 @@ return require("lazy").setup({
     -- For blink.cmp's completion
     -- source
     dependencies = {
-      "saghen/blink.cmp"
+      "saghen/blink.cmp",
     },
   },
 })
