@@ -22,7 +22,7 @@ require("telescope").setup({
 })
 
 -- snippets config
--- require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/java.lua" })
+require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/" })
 -- require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/javascriptreact.lua" })
 
 require("nvim-web-devicons").setup({
@@ -156,4 +156,16 @@ require("nvim-web-devicons").setup({
   --
   --
   vim.treesitter.language.register("tsx", "javascriptreact"),
+
+  -- luasnip keymaps
+  vim.keymap.set({ "i", "s" }, "<Tab>", function()
+    return require("luasnip").jumpable(1) and require("luasnip").jump(1) or "<Tab>"
+  end, { expr = true, silent = true }),
+
+  vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
+    return require("luasnip").jumpable(-1) and require("luasnip").jump(-1) or "<S-Tab>"
+  end, { expr = true, silent = true }),
+
+
+
 })
