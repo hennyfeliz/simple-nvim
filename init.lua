@@ -1,3 +1,6 @@
+-- cursor config
+vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver50,r-cr:hor20,o:hor50"
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 -- vim.opt.swapfile = true
