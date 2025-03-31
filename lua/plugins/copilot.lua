@@ -1,23 +1,31 @@
 return {
-  "zbirenbaum/copilot.lua",
-  cmd = "Copilot",
+  "github/copilot.vim",
   event = "InsertEnter",
   config = function()
-    require("copilot").setup({
-      suggestion = {
-        enabled = true,
-        auto_trigger = false,
-        hide_during_completion = false,
-        debounce = 25,
-        keymap = {
-          accept = false,
-          accept_word = false,
-          accept_line = "<Tab>",
-          next = false,
-          prev = false,
-          dismiss = false,
-        },
-      },
+    -- Disable the default <Tab> mapping provided by the plugin
+    vim.g.copilot_no_tab_map = true
+
+    -- Key mapping to accept Copilot's suggestion in insert mode using Ctrl-J
+    vim.keymap.set("i", "<C-J>", 'copilot#Accept("<CR>")', {
+      expr = true,
+      silent = true,
+      desc = "Accept GitHub Copilot suggestion",
     })
+
+    -- Optional: Create normal mode mapping to open the Copilot panel
+    vim.keymap.set("n", "<leader>cp", "<cmd>Copilot panel<CR>", {
+      noremap = true,
+      silent = true,
+      desc = "Open Copilot panel",
+    })
+
+    -- Optional: Mappings to enable or disable Copilot on the fly
+    vim.api.nvim_create_user_command("CopilotEnable", function()
+      vim.cmd("Copilot enable")
+    end, { desc = "Enable GitHub Copilot" })
+
+    vim.api.nvim_create_user_command("CopilotDisable", function()
+      vim.cmd("Copilot disable")
+    end, { desc = "Disable GitHub Copilot" })
   end,
 }
