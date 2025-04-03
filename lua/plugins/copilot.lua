@@ -4,13 +4,19 @@ return {
   config = function()
     -- Disable the default <Tab> mapping provided by the plugin
     vim.g.copilot_no_tab_map = true
+    vim.g.copilot_snippet_separator = ""
+    vim.g.copilot_assume_mapped = true
+    vim.g.copilot_no_tab_map = true
+
+    local map = vim.keymap.set
+    map("i", "<C-j>", "copilot#Accept('<CR>')", { noremap = true, silent = true, expr = true, replace_keycodes = false })
 
     -- Key mapping to accept Copilot's suggestion in insert mode using Ctrl-J
-    vim.keymap.set("i", "<C-J>", 'copilot#Accept("<CR>")', {
-      expr = true,
-      silent = true,
-      desc = "Accept GitHub Copilot suggestion",
-    })
+    -- vim.keymap.set("i", "<C-J>", 'copilot#Accept("<CR>")', {
+    --   expr = true,
+    --   silent = true,
+    --   desc = "Accept GitHub Copilot suggestion",
+    -- })
 
     -- Optional: Create normal mode mapping to open the Copilot panel
     vim.keymap.set("n", "<leader>cp", "<cmd>Copilot panel<CR>", {
