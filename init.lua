@@ -50,4 +50,3 @@ vim.opt.wrap = true
 -- vim.o.number = true
 -- vim.keymap.set("n", "<Space>", "", { noremap = true })
 -- ...
---

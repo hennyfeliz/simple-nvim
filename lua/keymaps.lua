@@ -43,7 +43,7 @@ vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" }
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
 
 -- Open floating diagnostic
-vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
+-- vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
 
 -- List all diagnostics with Telescope
 vim.keymap.set("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "List Diagnostics" })
