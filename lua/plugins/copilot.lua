@@ -11,13 +11,6 @@ return {
     local map = vim.keymap.set
     map("i", "<C-j>", "copilot#Accept('<CR>')", { noremap = true, silent = true, expr = true, replace_keycodes = false })
 
-    -- Key mapping to accept Copilot's suggestion in insert mode using Ctrl-J
-    -- vim.keymap.set("i", "<C-J>", 'copilot#Accept("<CR>")', {
-    --   expr = true,
-    --   silent = true,
-    --   desc = "Accept GitHub Copilot suggestion",
-    -- })
-
     -- Optional: Create normal mode mapping to open the Copilot panel
     vim.keymap.set("n", "<leader>cp", "<cmd>Copilot panel<CR>", {
       noremap = true,
