@@ -23,7 +23,6 @@ require("telescope").setup({
 
 -- snippets config
 require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/" })
--- require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/javascriptreact.lua" })
 
 require("nvim-web-devicons").setup({
   -- your personal icons can go here (to override)
