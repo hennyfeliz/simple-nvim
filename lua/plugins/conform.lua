@@ -23,6 +23,7 @@ return {
         sh = { "shfmt" },
         go = { "gofmt" },
         java = { "google_java_format" },
+        rust = { "rustftm", "rust_hdl" },
       },
       formatters = {
         eslint_d = {
@@ -45,6 +46,16 @@ return {
         google_java_format = {
           -- google-java-format does not support config via CLI for indent size,
           -- you’ll need to use the default or switch to clang-format for Java if critical
+        },
+        rustfmt = {
+          command = "rustfmt",
+          args = { "--edition", "2021" },
+          stdin = true,
+        },
+        rust_hdl = {
+          command = "rust_hdl",
+          args = { "--format", "verilog" },
+          stdin = true,
         },
       },
     })
