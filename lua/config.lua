@@ -79,6 +79,7 @@ require("nvim-web-devicons").setup({
     },
   },
 
+  -- lualine setup config
   lualine.setup({
     options = {
       icons_enabled = true,
