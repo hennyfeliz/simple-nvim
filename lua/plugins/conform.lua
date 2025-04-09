@@ -23,7 +23,7 @@ return {
         sh = { "shfmt" },
         go = { "gofmt" },
         java = { "google_java_format" },
-        rust = { "rustftm", "rust_hdl" },
+        rust = { "rustfmt", "rust_hdl" },
       },
       formatters = {
         eslint_d = {
