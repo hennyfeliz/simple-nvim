@@ -34,6 +34,10 @@ return {
       },
     })
     vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
-    vim.keymap.set("n", "C-h", ":NvimTreeFocus<CR>")
+    --set a keybind to exit nvim tree when enter a file and with C-enters "<C-<CR>> i think..." it opens the file, but keeps nvim tree open
+    -- vim.keymap.set("n", "<C-CR>", ":NvimTreeClose<CR>", { noremap = true, silent = true })
+    -- vim.keymap.set("n", "<C-CR>", "<CR><leader>e", { noremap = true, silent = true })
+    -- vim.keymap.set("n", "<CR>", "<CR>:NvimTreeClose<CR>", { noremap = true, silent = true })
+    -- vim.keymap.set("n", "<C-h>", ":NvimTreeFocus<CR>")
   end,
 }
