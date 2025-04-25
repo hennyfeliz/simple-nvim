@@ -27,4 +27,7 @@ return require("lazy").setup({
   require("plugins.copilot"),
   require("plugins.markview"),
   require("plugins.nvim-tree"),
+  require("plugins.toggleterm"),
+  require("plugins.dadbod"),
+  require("plugins.vim-visual-multi"),
 })

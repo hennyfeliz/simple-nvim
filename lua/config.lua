@@ -1,4 +1,5 @@
 require("nvim-treesitter.install").compilers = { "zig" }
+require("servers.config")
 
 vim.cmd.colorscheme("onedark")
 local cmp = require("cmp")
@@ -6,6 +7,18 @@ local actions = require("telescope.actions")
 local status, lualine = pcall(require, "lualine")
 if not status then
   return
+end
+
+local function server_status()
+  local status = {}
+  for name, server in pairs(servers) do
+    if server.job_id then
+      table.insert(status, name .. ": Running")
+    else
+      table.insert(status, name .. ": Stopped")
+    end
+  end
+  return table.concat(status, " | ")
 end
 
 -- Configuración de Telescope...
@@ -80,7 +93,7 @@ require("nvim-web-devicons").setup({
   },
 
   -- lualine setup config
-  lualine.setup({
+  require("lualine").setup({
     options = {
       icons_enabled = true,
       theme = "onedark",
@@ -92,11 +105,8 @@ require("nvim-web-devicons").setup({
       lualine_a = { "mode" },
       lualine_b = { "branch" },
       lualine_c = {
-        {
-          "filename",
-          file_status = true, -- displays file status (readonly status, modified status)
-          path = 0,           -- 0 = just filename, 1 = relative path, 2 = absolute path
-        },
+        { "filename",    file_status = true,                        path = 0 },
+        { server_status, color = { fg = "#ffffff", bg = "#3a3a3a" } }, -- Custom server status
       },
       lualine_x = {
         {
@@ -114,11 +124,7 @@ require("nvim-web-devicons").setup({
       lualine_a = {},
       lualine_b = {},
       lualine_c = {
-        {
-          "filename",
-          file_status = true, -- displays file status (readonly status, modified status)
-          path = 1,           -- 0 = just filename, 1 = relative path, 2 = absolute path
-        },
+        { "filename", file_status = true, path = 1 },
       },
       lualine_x = { "location" },
       lualine_y = {},
@@ -147,6 +153,13 @@ require("nvim-web-devicons").setup({
     }),
   }),
 
+  cmp.setup.filetype({ "sql" }, {
+    sources = {
+      { name = "vim-dadbod-completion" },
+      { name = "buffer" },
+    },
+  }),
+
   vim.filetype.add({
     extension = {
       jsx = "javascriptreact",
@@ -165,7 +178,4 @@ require("nvim-web-devicons").setup({
   vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
     return require("luasnip").jumpable(-1) and require("luasnip").jump(-1) or "<S-Tab>"
   end, { expr = true, silent = true }),
-
-
-
 })

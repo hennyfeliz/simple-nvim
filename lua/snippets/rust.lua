@@ -30,4 +30,22 @@ return {
     t({ "trait " }), i(1, "TraitName"), t({ " {", "\t" }),
     i(2, "fn method(&self);"), t({ "", "}" }),
   }),
+
+  -- Rust impl
+  s("impl", {
+    t({ "impl " }), i(1, "StructName"), t({ " {", "\t" }),
+    i(2, "fn new() -> Self {"), t({ "", "\t\t" }),
+    i(3, "Self {}"), t({ "", "\t}" }),
+    t({ "", "}" }),
+  }),
+
+  -- Rust printing
+  s("pr", {
+    t({ "println!(\"{}\", " }), i(1, "value"), t({ ");" }),
+  }),
+
+  -- Rust printing
+  s("pr", {
+    t({ "println!(\"" }), i(1, "value"), t({ "\");" }),
+  }),
 }

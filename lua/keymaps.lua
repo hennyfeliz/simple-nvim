@@ -20,10 +20,24 @@ map("n", "<leader>fe", function()
   require("telescope").extensions.file_browser.file_browser()
 end, { desc = "File browser" })
 
+-- normal mode
+map("n", "sj", "i<CR><esc>")
+map("n", "sk", "<S-i><backspace><esc>")
+map("n", "ss", "<S-a><CR><esc>")
+
 -- bufferline work keys
 map("n", "<S-h>", "<Cmd>BufferLineCyclePrev<CR>", { desc = "Prev buffer" })
 map("n", "<S-l>", "<Cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<leader>z", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
+
+map("n", "<C-j>", "<C-w>j", { noremap = true })
+map("n", "<C-k>", "<C-w>k", { noremap = true })
+map("n", "<C-h>", "<C-w>h", { noremap = true })
+map("n", "<C-l>", "<C-w>l", { noremap = true })
+
+-- closed bracket keybindings
+map("n", "f}", "/}\\n", { noremap = true, silent = true })
+map("v", "f}", "/}\\n", { noremap = true, silent = true })
 
 -- format code
 map({ "n", "v" }, "<leader>f", function()
@@ -52,6 +66,18 @@ vim.keymap.set("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "Li
 vim.keymap.set("n", "<leader>y", '"+y', { desc = 'Yank into " register' })
 vim.keymap.set("v", "<leader>y", '"+y', { desc = 'Yank into " register' })
 vim.keymap.set("n", "<leader>Y", '"+Y', { desc = 'Yank into " register' })
+vim.keymap.set("n", "<leader>ya", 'gg<S-v><S-g>"+Y', { desc = 'Yank all into " register' })
+
+-- vim.keymap.set("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
+-- Duplicate current line in normal mode:
+vim.keymap.set("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
+-- Duplicate selected lines in visual mode:
+vim.keymap.set("v", "<C-d>", ":t'><CR>", { desc = "Duplicate selection", noremap = true, silent = true })
+
+vim.keymap.set("n", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
+vim.keymap.set("n", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
+vim.keymap.set("v", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
+vim.keymap.set("v", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
 
 -- LSP Nav keymaps
 vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
@@ -60,3 +86,6 @@ vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to Im
 vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { desc = "List References" })
 vim.keymap.set("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" })
 --
+
+-- toggleterm keymaps
+vim.api.nvim_set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })
