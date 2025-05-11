@@ -89,3 +89,40 @@ vim.keymap.set("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type De
 
 -- toggleterm keymaps
 vim.api.nvim_set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })
+
+-- indentation buttons keymaps
+-- --
+vim.api.nvim_set_keymap('v', '>', '>gv', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<', '<gv', { noremap = true, silent = true })
+
+-- in your init.lua
+
+-- Move selected block down with Alt-j
+vim.keymap.set('v', '<A-j>',
+  ":m '>+1<CR>gv=gv",
+  { desc = "Move visual selection down", silent = true }
+)
+
+-- Move selected block up with Alt-k
+vim.keymap.set('v', '<A-k>',
+  ":m '<-2<CR>gv=gv",
+  { desc = "Move visual selection up", silent = true }
+)
+
+-- Move current line down/up
+vim.keymap.set('n', '<A-j>',
+  ":m .+1<CR>==",
+  { desc = "Move line down", silent = true }
+)
+vim.keymap.set('n', '<A-k>',
+  ":m .-2<CR>==",
+  { desc = "Move line up", silent = true }
+)
+
+-- always paste your last yank
+vim.keymap.set("n", "p", '"0p', { noremap = true, silent = true })
+vim.keymap.set("n", "P", '"0P', { noremap = true, silent = true })
+
+-- when replacing a visual selection, dump it to black hole then paste from 0
+vim.keymap.set("x", "p", '"_d"0p', { noremap = true, silent = true })
+vim.keymap.set("x", "P", '"_d"0P', { noremap = true, silent = true })

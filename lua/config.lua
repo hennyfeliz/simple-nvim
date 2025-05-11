@@ -34,6 +34,17 @@ require("telescope").setup({
   },
 })
 
+vim.diagnostic.config({
+  virtual_text = {
+    prefix = "●", -- could be "■", "▎", "●"
+    spacing = 2,
+  },
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+})
+
+
 -- snippets config
 require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/" })
 
@@ -94,44 +105,44 @@ require("nvim-web-devicons").setup({
 
   -- lualine setup config
   require("lualine").setup({
-    options = {
-      icons_enabled = true,
-      theme = "onedark",
-      section_separators = { left = "", right = "" },
-      component_separators = { left = "", right = "" },
-      disabled_filetypes = {},
-    },
-    sections = {
-      lualine_a = { "mode" },
-      lualine_b = { "branch" },
-      lualine_c = {
-        { "filename",    file_status = true,                        path = 0 },
-        { server_status, color = { fg = "#ffffff", bg = "#3a3a3a" } }, -- Custom server status
-      },
-      lualine_x = {
-        {
-          "diagnostics",
-          sources = { "nvim_diagnostic" },
-          symbols = { error = " ", warn = " ", info = " ", hint = " " },
-        },
-        "encoding",
-        "filetype",
-      },
-      lualine_y = { "progress" },
-      lualine_z = { "location" },
-    },
-    inactive_sections = {
-      lualine_a = {},
-      lualine_b = {},
-      lualine_c = {
-        { "filename", file_status = true, path = 1 },
-      },
-      lualine_x = { "location" },
-      lualine_y = {},
-      lualine_z = {},
-    },
-    tabline = {},
-    extensions = { "fugitive" },
+    -- options = {
+    --   icons_enabled = true,
+    --   theme = "onedark",
+    --   section_separators = { left = "", right = "" },
+    --   component_separators = { left = "", right = "" },
+    --   disabled_filetypes = {},
+    -- },
+    -- sections = {
+    --   lualine_a = { "mode" },
+    --   lualine_b = { "branch" },
+    --   lualine_c = {
+    --     { "filename",    file_status = true,                        path = 0 },
+    --     { server_status, color = { fg = "#ffffff", bg = "#3a3a3a" } }, -- Custom server status
+    --   },
+    --   lualine_x = {
+    --     {
+    --       "diagnostics",
+    --       sources = { "nvim_diagnostic" },
+    --       symbols = { error = " ", warn = " ", info = " ", hint = " " },
+    --     },
+    --     "encoding",
+    --     "filetype",
+    --   },
+    --   lualine_y = { "progress" },
+    --   lualine_z = { "location" },
+    -- },
+    -- inactive_sections = {
+    --   lualine_a = {},
+    --   lualine_b = {},
+    --   lualine_c = {
+    --     { "filename", file_status = true, path = 1 },
+    --   },
+    --   lualine_x = { "location" },
+    --   lualine_y = {},
+    --   lualine_z = {},
+    -- },
+    -- tabline = {},
+    -- extensions = { "fugitive" },
   }),
 
   cmp.setup({

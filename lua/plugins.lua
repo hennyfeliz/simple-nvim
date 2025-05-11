@@ -29,5 +29,6 @@ return require("lazy").setup({
   require("plugins.nvim-tree"),
   require("plugins.toggleterm"),
   require("plugins.dadbod"),
+  require("plugins.error_lens"),
   require("plugins.vim-visual-multi"),
 })
