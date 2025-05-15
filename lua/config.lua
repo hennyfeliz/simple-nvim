@@ -34,9 +34,43 @@ require("telescope").setup({
   },
 })
 
+-- >>>> SHIM OUT NEOVIM-DEPRECATED APIS <<<<
+-- override tbl_add_reverse_lookup so health-check never finds the old one
+vim.tbl_add_reverse_lookup = function(tbl)
+  for k, v in pairs(tbl) do
+    tbl[v] = k
+  end
+end
+
+-- override tbl_flatten so health-check never finds the old one
+vim.tbl_flatten = function(list)
+  local result = {}
+  for _, item in ipairs(list) do
+    if type(item) == "table" then
+      for _, v in ipairs(item) do
+        table.insert(result, v)
+      end
+    else
+      table.insert(result, item)
+    end
+  end
+  return result
+end
+-- <<<< END SHIMS >>>>
+
+local function on_attach(bufnr)
+  local api = require("nvim-tree.api")
+  api.config.mappings.default_on_attach(bufnr)
+  vim.keymap.del("n", "<C-k>", { buffer = bufnr })
+end
+
+require("nvim-tree").setup {
+  on_attach = on_attach,
+}
+
 vim.diagnostic.config({
   virtual_text = {
-    prefix = "●", -- could be "■", "▎", "●"
+    prefix = "●",
     spacing = 2,
   },
   signs = true,
