@@ -68,6 +68,9 @@ vim.keymap.set("v", "<leader>y", '"+y', { desc = 'Yank into " register' })
 vim.keymap.set("n", "<leader>Y", '"+Y', { desc = 'Yank into " register' })
 vim.keymap.set("n", "<leader>ya", 'gg<S-v><S-g>"+Y', { desc = 'Yank all into " register' })
 
+-- reeplace everything
+vim.keymap.set("n", "<leader>ca", 'gg<S-v><S-g>d"*p', { desc = 'Paste everything in the paper " register' })
+
 -- vim.keymap.set("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
 -- Duplicate current line in normal mode:
 vim.keymap.set("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
