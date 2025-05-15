@@ -30,5 +30,6 @@ return require("lazy").setup({
   require("plugins.toggleterm"),
   require("plugins.dadbod"),
   require("plugins.error_lens"),
+  require("plugins.symbols-outline"),
   require("plugins.vim-visual-multi"),
 })
