@@ -22,13 +22,9 @@ return {
     t("const ["), i(1, "state"), t(", "), i(2, "setState"), t("] = useState("), i(3, "initial"), t(");"),
   }),
 
-  -- s("us", {
-  --   t("const ["), i(1, "state"), t(", "),
-  --   f(function(args)
-  --     local name = args[1][1]
-  --     return "set" .. name:sub(1, 1):upper() .. name:sub(2)
-  --   end, { 1 }),
-  --   t("] = useState("), i(2, "initial"), t(");"),
-  -- }),
+  -- export const funct = () => {}
+  s("ecf", {
+    t("export const "), i(1, "functionName"), t(" = () => {"), i(2, "return"), t("; };"),
+  }),
 
 }
