@@ -20,4 +20,20 @@ return {
     i(3, "field"), t({ ") {", "\t" }), t({ "this." }), i(4, "field"), t({ " = " }),
     i(5, "field"), t({ ";", "}" }),
   }),
+
+  s("constructor", {
+    t({ "public " }), i(1, "ClassName"), t({ "(" }), i(2, "Type"), t({ " " }), i(3, "field"),
+    t({ ") {", "\t" }), t({ "this." }), i(4, "field"), t({ " = " }), i(5, "field"),
+    t({ ";", "}" }),
+  }),
+
+  s("staticClass", {
+    t({ "public static class " }), i(1, "ClassName"), t({ " {", "\t" }),
+    i(2, "Field"), t({ ";", "", "}" }),
+  }),
+
+  s("staticInterface", {
+    t({ "public static interface " }), i(1, "InterfaceName"), t({ " {", "\t" }),
+    i(2, "Method"), t({ "();", "", "}" }),
+  }),
 }
