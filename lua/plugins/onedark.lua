@@ -5,7 +5,7 @@ return {
     require("onedark").setup({
       -- Your config goes here
       style = "darker",
-      transparent = true,
+      transparent = false,
       term_colors = true,
       ending_tildes = false,
       cmp_itemkind_reverse = false,
@@ -19,7 +19,7 @@ return {
         variables = "none",
       },
       lualine = {
-        transparent = true,
+        transparent = false,
       },
       colors = {},
       highlights = {},
