@@ -33,31 +33,31 @@ require("config")
 require("theme")
 
 -- make absolutely sure no highlight group paints its own bg
-vim.cmd([[
-  " Core background groups
-  hi Normal           guibg=NONE ctermbg=NONE
-  hi NormalNC         guibg=NONE ctermbg=NONE
-  hi SignColumn       guibg=NONE ctermbg=NONE
-  hi EndOfBuffer      guibg=NONE ctermbg=NONE
-
-  " nvim-tree panels
-  hi NvimTreeNormal   guibg=NONE
-  hi NvimTreeEndOfBuffer guibg=NONE
-
-  " bufferline (tabs/buffers)
-  hi BufferLineBackground      guibg=NONE
-  hi BufferLineFill            guibg=NONE
-  hi BufferLineSeparator       guibg=NONE
-  hi BufferLineSeparatorInactive guibg=NONE
-  hi BufferLineSeparatorVisible   guibg=NONE
-  hi BufferLineBuffer          guibg=NONE
-  hi BufferLineBufferVisible   guibg=NONE
-  hi BufferLineBufferSelected  guibg=NONE
-  hi BufferLineTab             guibg=NONE
-  hi BufferLineTabActive       guibg=NONE
-  hi BufferLineTabVisible      guibg=NONE
-  hi BufferLineTabSeparator    guibg=NONE
-]])
+-- vim.cmd([[
+--   " Core background groups
+--   hi Normal           guibg=NONE ctermbg=NONE
+--   hi NormalNC         guibg=NONE ctermbg=NONE
+--   hi SignColumn       guibg=NONE ctermbg=NONE
+--   hi EndOfBuffer      guibg=NONE ctermbg=NONE
+--
+--   " nvim-tree panels
+--   hi NvimTreeNormal   guibg=NONE
+--   hi NvimTreeEndOfBuffer guibg=NONE
+--
+--   " bufferline (tabs/buffers)
+--   hi BufferLineBackground      guibg=NONE
+--   hi BufferLineFill            guibg=NONE
+--   hi BufferLineSeparator       guibg=NONE
+--   hi BufferLineSeparatorInactive guibg=NONE
+--   hi BufferLineSeparatorVisible   guibg=NONE
+--   hi BufferLineBuffer          guibg=NONE
+--   hi BufferLineBufferVisible   guibg=NONE
+--   hi BufferLineBufferSelected  guibg=NONE
+--   hi BufferLineTab             guibg=NONE
+--   hi BufferLineTabActive       guibg=NONE
+--   hi BufferLineTabVisible      guibg=NONE
+--   hi BufferLineTabSeparator    guibg=NONE
+-- ]])
 
 
 -- 3. (Optional) Set some basic options or keymaps here
