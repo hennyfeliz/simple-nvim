@@ -25,6 +25,7 @@ return {
       },
       view = {
         width = 30,
+        adaptive_size = true, -- optional: shrink/expand tree to fit
       },
       renderer = {
         group_empty = true,
@@ -32,8 +33,14 @@ return {
       filters = {
         dotfiles = true,
       },
+      update_focused_file = {
+        enable      = true, -- auto-locate the current file
+        update_cwd  = true, -- also cd into its folder
+        ignore_list = {},   -- files/dirs to skip, if any
+      },
     })
     vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
+    vim.keymap.set("n", "<leader>je", ":NvimTreeFindFile<CR>", { silent = true })
     --set a keybind to exit nvim tree when enter a file and with C-enters "<C-<CR>> i think..." it opens the file, but keeps nvim tree open
     -- vim.keymap.set("n", "<C-CR>", ":NvimTreeClose<CR>", { noremap = true, silent = true })
     -- vim.keymap.set("n", "<C-CR>", "<CR><leader>e", { noremap = true, silent = true })
