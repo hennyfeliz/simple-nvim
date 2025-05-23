@@ -28,16 +28,28 @@ map("n", "ss", "<S-a><CR><esc>")
 -- bufferline work keys
 map("n", "<S-h>", "<Cmd>BufferLineCyclePrev<CR>", { desc = "Prev buffer" })
 map("n", "<S-l>", "<Cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
-map("n", "<leader>z", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
+map("n", "<C-i>", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
 
+-- selection keybindings
+map("n", "<leader>aa", "gg<S-v><S-g>", { desc = "Select all" })
+map("n", "<leader>ar",
+  "gg<S-v><S-g>:s/",
+  { desc = "Select & search all" }
+)
+map("v", "<leader>r",
+  ":s/",
+  { desc = "Substitute in visual selection" }
+)
+
+-- window navigation
 map("n", "<C-j>", "<C-w>j", { noremap = true })
 map("n", "<C-k>", "<C-w>k", { noremap = true })
 map("n", "<C-h>", "<C-w>h", { noremap = true })
 map("n", "<C-l>", "<C-w>l", { noremap = true })
 
 -- closed bracket keybindings
-map("n", "f}", "/}\\n", { noremap = true, silent = true })
-map("v", "f}", "/}\\n", { noremap = true, silent = true })
+-- map("n", "f}", "/}\\n", { noremap = true, silent = true })
+-- map("v", "f}", "/}\\n", { noremap = true, silent = true })
 
 -- format code
 map({ "n", "v" }, "<leader>f", function()
