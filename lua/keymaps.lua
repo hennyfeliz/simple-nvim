@@ -94,6 +94,11 @@ vim.keymap.set("n", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
 vim.keymap.set("v", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
 vim.keymap.set("v", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
 
+vim.keymap.set("n", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
+vim.keymap.set("n", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
+vim.keymap.set("v", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
+vim.keymap.set("v", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
+
 -- LSP Nav keymaps
 vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
 vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs" })
@@ -135,8 +140,12 @@ vim.keymap.set('n', '<A-k>',
 )
 
 -- always paste your last yank
-vim.keymap.set("n", "p", '"0p', { noremap = true, silent = true })
-vim.keymap.set("n", "P", '"0P', { noremap = true, silent = true })
+-- leave p/P default, but give <leader>p for “paste last yank”
+vim.keymap.set("n", "<leader>p", '"0p', { desc = "Paste last yank" })
+vim.keymap.set("n", "<leader>P", '"0P', { desc = "Paste last yank (before cursor)" })
+
+-- vim.keymap.set("n", "p", '"0p', { noremap = true, silent = true })
+-- vim.keymap.set("n", "P", '"0P', { noremap = true, silent = true })
 
 -- when replacing a visual selection, dump it to black hole then paste from 0
 vim.keymap.set("x", "p", '"_d"0p', { noremap = true, silent = true })
