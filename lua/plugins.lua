@@ -2,6 +2,7 @@
 
 return require("lazy").setup({
   require("plugins.snacks"),
+  require("plugins.snacks-picker"),
   require("plugins.plenary"),
   require("plugins.telescope"),
   require("plugins.telescope-file-browser"),
@@ -31,6 +32,8 @@ return require("lazy").setup({
   require("plugins.toggleterm"),
   require("plugins.dadbod"),
   require("plugins.goose"),
+  require("plugins.vim-surround"),
+  require("plugins.nvim-dap"),
   require("plugins.copilot-chat"),
   require("plugins.error_lens"),
   require("plugins.symbols-outline"),
