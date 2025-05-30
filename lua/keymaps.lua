@@ -47,10 +47,6 @@ map("n", "<C-k>", "<C-w>k", { noremap = true })
 map("n", "<C-h>", "<C-w>h", { noremap = true })
 map("n", "<C-l>", "<C-w>l", { noremap = true })
 
--- closed bracket keybindings
--- map("n", "f}", "/}\\n", { noremap = true, silent = true })
--- map("v", "f}", "/}\\n", { noremap = true, silent = true })
-
 -- format code
 map({ "n", "v" }, "<leader>f", function()
   require("conform").format({ async = true, lsp_fallback = true })
@@ -58,7 +54,7 @@ end, { desc = "Format file or range" })
 
 -- FORMAT CODE KEYBINDS
 --
-map({ "n", "v" }, "<leader>f", function()
+map({ "n", "v" }, "<leader>fm", function()
   require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Format file or range" })
 
@@ -94,10 +90,17 @@ vim.keymap.set("n", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
 vim.keymap.set("v", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
 vim.keymap.set("v", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
 
-vim.keymap.set("n", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
-vim.keymap.set("n", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
-vim.keymap.set("v", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
-vim.keymap.set("v", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
+-- vim.keymap.set("n", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
+-- vim.keymap.set("n", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
+-- vim.keymap.set("v", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
+-- vim.keymap.set("v", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
+
+-- quotes surrounding
+-- -- wrap word in double-quotes with <leader>"
+-- vim.keymap.set('n', '<leader>"', 'viw<esc>a"<esc>bi"<esc>', { noremap = true, silent = true })
+
+-- -- wrap word in single-quotes with <leader>'
+-- vim.keymap.set('n', "<leader>'", "viw<esc>a'<esc>bi'<esc>", { noremap = true, silent = true })
 
 -- LSP Nav keymaps
 vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
