@@ -100,8 +100,18 @@ return {
       },
     })
 
+
     vim.api.nvim_create_autocmd("LspAttach", {
+
+
       callback = function(args)
+        -- local buf = args.buf
+        -- local opts = { buffer = buf, silent = true, noremap = true }
+        -- <leader>ca for "code actions"
+        -- vim.keymap.set("n", "<leader>cc", function()
+        --   require("telescope.builtin").lsp_code_actions({ border = true })
+        -- end, vim.tbl_extend("force", opts, { desc = " Code Actions" }))
+
         local c = vim.lsp.get_client_by_id(args.data.client_id)
         if not c then
           return
@@ -124,7 +134,8 @@ return {
 
         -- vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition,
         --   vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
-        vim.keymap.set("n", "J", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
+        vim.keymap.set("n", "J", vim.lsp.buf.definition,
+          vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
         vim.keymap.set(
           "n",
           "<leader>gr",
@@ -137,7 +148,8 @@ return {
           vim.lsp.buf.implementation,
           vim.tbl_extend("force", opts, { desc = "Go to Implementation" })
         )
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover Docs" }))
+        vim.keymap.set("n", "K", vim.lsp.buf.hover,
+          vim.tbl_extend("force", opts, { desc = "Hover Docs" }))
       end,
     })
 
