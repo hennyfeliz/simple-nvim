@@ -1,7 +1,7 @@
 -- ~/.config/nvim/lua/keymaps.lua
 local map = vim.keymap.set
 
--- Telescope’s built-in pickers
+-- Telescope's built-in pickers
 map("n", "<leader>ff", function()
   require("telescope.builtin").find_files()
 end, { desc = "Find files" })
@@ -14,6 +14,28 @@ end, { desc = "List buffers" })
 map("n", "<leader>fh", function()
   require("telescope.builtin").help_tags()
 end, { desc = "Help tags" })
+
+-- Search for text inside quotes
+map("n", "<leader>sf", function()
+  -- Save cursor position
+  local cursor_pos = vim.api.nvim_win_get_cursor(0)
+
+  -- Enter visual mode, select inside quotes, and yank to unnamed register
+  vim.cmd('normal! vi"y')
+
+  -- Get the yanked text
+  local search_text = vim.fn.getreg('"')
+
+  -- Restore cursor position
+  vim.api.nvim_win_set_cursor(0, cursor_pos)
+
+  -- If we found text, search for it with telescope
+  if search_text and search_text ~= "" then
+    require("telescope.builtin").live_grep({ default_text = search_text })
+  else
+    print("No text found inside quotes")
+  end
+end, { desc = "Search text inside quotes with telescope" })
 
 -- File browser extension
 map("n", "<leader>fe", function()
@@ -143,7 +165,7 @@ vim.keymap.set('n', '<A-k>',
 )
 
 -- always paste your last yank
--- leave p/P default, but give <leader>p for “paste last yank”
+-- leave p/P default, but give <leader>p for "paste last yank"
 vim.keymap.set("n", "<leader>p", '"0p', { desc = "Paste last yank" })
 vim.keymap.set("n", "<leader>P", '"0P', { desc = "Paste last yank (before cursor)" })
 
@@ -153,3 +175,19 @@ vim.keymap.set("n", "<leader>P", '"0P', { desc = "Paste last yank (before cursor
 -- when replacing a visual selection, dump it to black hole then paste from 0
 vim.keymap.set("x", "p", '"_d"0p', { noremap = true, silent = true })
 vim.keymap.set("x", "P", '"_d"0P', { noremap = true, silent = true })
+
+
+
+
+
+
+--
+--
+--
+--
+--
+--
+--
+--
+--
+-- end of the file...
