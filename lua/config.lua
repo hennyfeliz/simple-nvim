@@ -94,29 +94,8 @@ require('goose').setup({
   }
 })
 
--- >>>> SHIM OUT NEOVIM-DEPRECATED APIS <<<<
--- override tbl_add_reverse_lookup so health-check never finds the old one
-vim.tbl_add_reverse_lookup = function(tbl)
-  for k, v in pairs(tbl) do
-    tbl[v] = k
-  end
-end
-
--- override tbl_flatten so health-check never finds the old one
-vim.tbl_flatten = function(list)
-  local result = {}
-  for _, item in ipairs(list) do
-    if type(item) == "table" then
-      for _, v in ipairs(item) do
-        table.insert(result, v)
-      end
-    else
-      table.insert(result, item)
-    end
-  end
-  return result
-end
--- <<<< END SHIMS >>>>
+-- Remove deprecated shim functions that are causing warnings
+-- Modern Neovim handles these automatically
 
 local function on_attach(bufnr)
   local api = require("nvim-tree.api")
