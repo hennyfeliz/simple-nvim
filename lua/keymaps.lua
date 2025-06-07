@@ -177,9 +177,11 @@ vim.keymap.set("x", "p", '"_d"0p', { noremap = true, silent = true })
 vim.keymap.set("x", "P", '"_d"0P', { noremap = true, silent = true })
 
 
-
-
-
+-- in your keymaps.lua or init.lua:
+local map = vim.keymap.set
+map("n", "<leader>f/", function()
+  require("telescope.builtin").live_grep({ default_text = vim.fn.getreg("/") })
+end, { desc = "Live grep (reuse last search)" })
 
 --
 --
