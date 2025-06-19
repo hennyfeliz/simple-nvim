@@ -65,18 +65,22 @@ return {
           goto_next_start = {
             ["]m"] = "@function.outer",
             ["]]"] = "@class.outer",
+            ["]q"] = "@string.outer",
           },
           goto_next_end = {
             ["]M"] = "@function.outer",
             ["]["] = "@class.outer",
+            ["]Q"] = "@string.outer",
           },
           goto_previous_start = {
             ["[m"] = "@function.outer",
             ["[["] = "@class.outer",
+            ["[q"] = "@string.outer",
           },
           goto_previous_end = {
             ["[M"] = "@function.outer",
             ["[]"] = "@class.outer",
+            ["[Q"] = "@string.outer",
           },
         },
         swap = {

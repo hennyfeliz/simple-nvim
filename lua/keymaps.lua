@@ -83,53 +83,55 @@ end, { desc = "Format file or range" })
 --
 -- LSP CONFIG KEYBINDS
 -- Go to next/prev diagnostic
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
+map("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
+map("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
 
 -- Open floating diagnostic
--- vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
+-- map("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
 
 -- List all diagnostics with Telescope
-vim.keymap.set("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "List Diagnostics" })
+map("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "List Diagnostics" })
 
 -- Copy text to " register
-vim.keymap.set("n", "<leader>y", '"+y', { desc = 'Yank into " register' })
-vim.keymap.set("v", "<leader>y", '"+y', { desc = 'Yank into " register' })
-vim.keymap.set("n", "<leader>Y", '"+Y', { desc = 'Yank into " register' })
-vim.keymap.set("n", "<leader>ya", 'gg<S-v><S-g>"+Y', { desc = 'Yank all into " register' })
+map('n', '<leader>y', '"+y', { desc = 'Yank into " register' })
+map('v', '<leader>y', '"+y', { desc = 'Yank into " register' })
+map('n', '<leader>Y', '"+Y', { desc = 'Yank into " register' })
+-- map('n', '<leader>ya', 'gg<S-v><S-g>"+Y', { desc = 'Yank all into " register' })
+map('n', '<leader>ya', 'gg<S-v><S-g><leader>Y', { desc = 'Yank all into " register' })
 
 -- reeplace everything
-vim.keymap.set("n", "<leader>ca", 'gg<S-v><S-g>d"*p', { desc = 'Paste everything in the paper " register' })
+map("n", "<leader>ca", 'gg<S-v><S-g>d"*p', { desc = 'Paste everything in the paper " register' })
 
--- vim.keymap.set("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
+-- map("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
 -- Duplicate current line in normal mode:
-vim.keymap.set("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
+map("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
 -- Duplicate selected lines in visual mode:
-vim.keymap.set("v", "<C-d>", ":t'><CR>", { desc = "Duplicate selection", noremap = true, silent = true })
+map("v", "<C-d>", ":t'><CR>gv",
+  { desc = "Duplicate selection (keep selection)", noremap = true, silent = true })
 
-vim.keymap.set("n", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
-vim.keymap.set("n", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
-vim.keymap.set("v", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
-vim.keymap.set("v", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
+map("n", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
+map("n", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
+map("v", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
+map("v", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
 
--- vim.keymap.set("n", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
--- vim.keymap.set("n", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
--- vim.keymap.set("v", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
--- vim.keymap.set("v", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
+-- map("n", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
+-- map("n", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
+-- map("v", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
+-- map("v", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
 
 -- quotes surrounding
 -- -- wrap word in double-quotes with <leader>"
--- vim.keymap.set('n', '<leader>"', 'viw<esc>a"<esc>bi"<esc>', { noremap = true, silent = true })
+-- map('n', '<leader>"', 'viw<esc>a"<esc>bi"<esc>', { noremap = true, silent = true })
 
 -- -- wrap word in single-quotes with <leader>'
--- vim.keymap.set('n', "<leader>'", "viw<esc>a'<esc>bi'<esc>", { noremap = true, silent = true })
+-- map('n', "<leader>'", "viw<esc>a'<esc>bi'<esc>", { noremap = true, silent = true })
 
 -- LSP Nav keymaps
-vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
-vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs" })
-vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
-vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { desc = "List References" })
-vim.keymap.set("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" })
+map("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+map("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs" })
+map("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
+map("n", "<leader>gr", vim.lsp.buf.references, { desc = "List References" })
+map("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" })
 --
 
 -- toggleterm keymaps
@@ -140,48 +142,63 @@ vim.api.nvim_set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>",
 vim.api.nvim_set_keymap('v', '>', '>gv', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '<', '<gv', { noremap = true, silent = true })
 
--- in your init.lua
+-- Quote/bracket selection helpers (Normal mode)
+vim.keymap.set('n', '{', 'vi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+vim.keymap.set('n', '}', 'va"', { noremap = true, silent = true, nowait = true, desc = 'Select around ""' })
+vim.keymap.set('n', '[', "va'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
+vim.keymap.set('n', ']', "vi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
+
+-- Quote/bracket selection helpers (Visual mode)
+vim.keymap.set('v', '{', '<Esc>llvi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+vim.keymap.set('v', '}', '<Esc>llva"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+vim.keymap.set('v', '[', "<Esc>llva'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
+vim.keymap.set('v', ']', "<Esc>llvi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
+
+
+-- No special mappings in visual mode for { } now
 
 -- Move selected block down with Alt-j
-vim.keymap.set('v', '<A-j>',
+map('v', '<A-j>',
   ":m '>+1<CR>gv=gv",
   { desc = "Move visual selection down", silent = true }
 )
 
 -- Move selected block up with Alt-k
-vim.keymap.set('v', '<A-k>',
+map('v', '<A-k>',
   ":m '<-2<CR>gv=gv",
   { desc = "Move visual selection up", silent = true }
 )
 
 -- Move current line down/up
-vim.keymap.set('n', '<A-j>',
+map('n', '<A-j>',
   ":m .+1<CR>==",
   { desc = "Move line down", silent = true }
 )
-vim.keymap.set('n', '<A-k>',
+
+map('n', '<A-k>',
   ":m .-2<CR>==",
   { desc = "Move line up", silent = true }
 )
 
 -- always paste your last yank
 -- leave p/P default, but give <leader>p for "paste last yank"
-vim.keymap.set("n", "<leader>p", '"0p', { desc = "Paste last yank" })
-vim.keymap.set("n", "<leader>P", '"0P', { desc = "Paste last yank (before cursor)" })
-
--- vim.keymap.set("n", "p", '"0p', { noremap = true, silent = true })
--- vim.keymap.set("n", "P", '"0P', { noremap = true, silent = true })
+map("n", "<leader>p", '"0p', { desc = "Paste last yank" })
+map("n", "<leader>P", '"0P', { desc = "Paste last yank (before cursor)" })
+-- map("n", "p", '"0p', { noremap = true, silent = true })
+-- map("n", "P", '"0P', { noremap = true, silent = true })
 
 -- when replacing a visual selection, dump it to black hole then paste from 0
-vim.keymap.set("x", "p", '"_d"0p', { noremap = true, silent = true })
-vim.keymap.set("x", "P", '"_d"0P', { noremap = true, silent = true })
+-- map("x", "p", '"_d"0p', { noremap = true, silent = true })
+-- map("x", "P", '"_d"0P', { noremap = true, silent = true })
 
+-- search for the selected text in visual mode
+-- map('v', '<leader>fl', '"*y<leader>fg<C-v>', { noremap = true, silent = true })
 
--- in your keymaps.lua or init.lua:
-local map = vim.keymap.set
-map("n", "<leader>f/", function()
-  require("telescope.builtin").live_grep({ default_text = vim.fn.getreg("/") })
-end, { desc = "Live grep (reuse last search)" })
+-- resume last Telescope picker (incl. live_grep) with your previous query
+map('n', '<leader>fk',
+  require('telescope.builtin').resume,
+  { silent = true, desc = 'Resume last Telescope search' }
+)
 
 --
 --

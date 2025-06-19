@@ -1,20 +1,19 @@
 -- cursor config
 vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver50,r-cr:hor20,o:hor50"
 
-vim.opt.clipboard = "unnamedplus"
-
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 -- vim.opt.swapfile = true
 -- vim.opt.directory = os.getenv("HOME") .. "/.config/nvim/swap//"
 vim.opt.swapfile = false
+vim.opt.shadafile = 'NONE'
 
 vim.env.PATH = "C:/Users/henny/scoop/persist/nodejs/bin;" .. vim.env.PATH
 
 -- ~/.config/nvim/init.lua
 
 -- 1. Bootstrap lazy.nvim (the plugin manager)
---    This automatically clones lazy.nvim to your system if it’s not present.
+--    This automatically clones lazy.nvim to your system if it's not present.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({

@@ -1,29 +1,29 @@
-return {
-  {
-    "CopilotC-Nvim/CopilotChat.nvim",
-    dependencies = { "github/copilot.vim", "nvim-lua/plenary.nvim" },
-    config = function()
-      require("CopilotChat").setup({
-        panel = {
-          keymaps = {
-            open     = "<leader>kk",
-            close    = "q",
-            refresh  = "<leader>kr",
-            next     = "<leader>kn",
-            prev     = "<leader>kp",
-            prompt   = "<leader>kp",
-            yank     = "<leader>ky",
-            yank_all = "<leader>ka",
-          },
-        },
-        popup = {
-          keymaps = {
-            close  = "<leader>kc",
-            accept = "<leader>ka",
-          },
-        },
-      })
-      vim.keymap.set("n", "<leader>kc", "<cmd>CopilotChat<cr>", { desc = " Open Copilot Chat" })
-    end,
-  },
-}
+-- return {
+--   {
+--     "CopilotC-Nvim/CopilotChat.nvim",
+--     dependencies = { "github/copilot.vim", "nvim-lua/plenary.nvim" },
+--     config = function()
+--       require("CopilotChat").setup({
+--         panel = {
+--           keymaps = {
+--             open     = "<leader>kk",
+--             close    = "q",
+--             refresh  = "<leader>kr",
+--             next     = "<leader>kn",
+--             prev     = "<leader>kp",
+--             prompt   = "<leader>kp",
+--             yank     = "<leader>ky",
+--             yank_all = "<leader>ka",
+--           },
+--         },
+--         popup = {
+--           keymaps = {
+--             close  = "<leader>kc",
+--             accept = "<leader>ka",
+--           },
+--         },
+--       })
+--       vim.keymap.set("n", "<leader>kc", "<cmd>CopilotChat<cr>", { desc = " Open Copilot Chat" })
+--     end,
+--   },
+-- }

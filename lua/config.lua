@@ -1,5 +1,5 @@
 require("nvim-treesitter.install").compilers = { "zig" }
-require("servers.config")
+local servers = require("servers.config")
 
 vim.cmd.colorscheme("onedark")
 local cmp = require("cmp")
@@ -263,3 +263,7 @@ require("nvim-web-devicons").setup({
     return require("luasnip").jumpable(-1) and require("luasnip").jump(-1) or "<S-Tab>"
   end, { expr = true, silent = true }),
 })
+
+vim.keymap.set("x", "p", '"_dP', { noremap = true, silent = true, desc = "Paste without overwriting yank" })
+
+vim.opt.shadafile = 'NONE'
