@@ -3,6 +3,10 @@ vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver50,r-cr:hor20,o:hor50"
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+vim.o.relativenumber = true
+
+
+
 -- vim.opt.swapfile = true
 -- vim.opt.directory = os.getenv("HOME") .. "/.config/nvim/swap//"
 vim.opt.swapfile = false
