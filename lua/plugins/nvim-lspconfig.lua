@@ -13,6 +13,7 @@ return {
     "saadparwaiz1/cmp_luasnip",
     "j-hui/fidget.nvim",
     "saghen/blink.cmp",
+
     {
       "folke/lazydev.nvim",
       opts = {
@@ -33,7 +34,7 @@ return {
     -- Mason setup
     require("mason").setup()
     require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls", "rust_analyzer", "gopls", "html", "cssls", "emmet_ls" },
+      ensure_installed = { "lua_ls", "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "typescript-language-server", "jdtls" },
       handlers = {
         function(server_name)
           require("lspconfig")[server_name].setup({ capabilities = capabilities })
@@ -87,37 +88,56 @@ return {
           })
           vim.g.zig_fmt_parse_errors = 0
           vim.g.zig_fmt_autosave = 0
+                end,
+
+        ["jdtls"] = function()
+          -- Skip jdtls here - handled by nvim-jdtls plugin
+        end,
+
+        ["typescript-language-server"] = function()
+          -- TypeScript/JavaScript Language Server configuration  
+          require("lspconfig").tsserver.setup({
+            capabilities = capabilities,
+            settings = {
+              typescript = {
+                inlayHints = {
+                  includeInlayParameterNameHints = 'all',
+                  includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                  includeInlayFunctionParameterTypeHints = true,
+                  includeInlayVariableTypeHints = true,
+                  includeInlayPropertyDeclarationTypeHints = true,
+                  includeInlayFunctionLikeReturnTypeHints = true,
+                  includeInlayEnumMemberValueHints = true,
+                }
+              },
+              javascript = {
+                inlayHints = {
+                  includeInlayParameterNameHints = 'all',
+                  includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                  includeInlayFunctionParameterTypeHints = true,
+                  includeInlayVariableTypeHints = true,
+                  includeInlayPropertyDeclarationTypeHints = true,
+                  includeInlayFunctionLikeReturnTypeHints = true,
+                  includeInlayEnumMemberValueHints = true,
+                }
+              }
+            }
+          })
         end,
       },
     })
 
-    -- TypeScript custom cmd
-    require("lspconfig").tsserver.setup({
-      capabilities = capabilities,
-      cmd = {
-        "C:/Users/henny/scoop/apps/nodejs/current/bin/typescript-language-server.cmd",
-        "--stdio",
-      },
-    })
+    -- TypeScript is now handled in the ts_ls handler above
 
 
     vim.api.nvim_create_autocmd("LspAttach", {
-
-
       callback = function(args)
-        -- local buf = args.buf
-        -- local opts = { buffer = buf, silent = true, noremap = true }
-        -- <leader>ca for "code actions"
-        -- vim.keymap.set("n", "<leader>cc", function()
-        --   require("telescope.builtin").lsp_code_actions({ border = true })
-        -- end, vim.tbl_extend("force", opts, { desc = " Code Actions" }))
-
         local c = vim.lsp.get_client_by_id(args.data.client_id)
         if not c then
           return
         end
 
-        -- Format on save (you already have this)
+        -- Format on save for Lua
         if vim.bo.filetype == "lua" then
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = args.buf,
@@ -127,29 +147,31 @@ return {
           })
         end
 
-        -- Auto format Lua on save
         -- LSP keymaps
         local buf = args.buf
         local opts = { buffer = buf, noremap = true, silent = true }
 
-        -- vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition,
-        --   vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
+        -- Navigation
         vim.keymap.set("n", "J", vim.lsp.buf.definition,
           vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
-        vim.keymap.set(
-          "n",
-          "<leader>gr",
-          vim.lsp.buf.references,
-          vim.tbl_extend("force", opts, { desc = "Find References" })
-        )
-        vim.keymap.set(
-          "n",
-          "<leader>gi",
-          vim.lsp.buf.implementation,
-          vim.tbl_extend("force", opts, { desc = "Go to Implementation" })
-        )
+        vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references,
+          vim.tbl_extend("force", opts, { desc = "Find References" }))
+        vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation,
+          vim.tbl_extend("force", opts, { desc = "Go to Implementation" }))
         vim.keymap.set("n", "K", vim.lsp.buf.hover,
           vim.tbl_extend("force", opts, { desc = "Hover Docs" }))
+
+        -- Code actions
+        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,
+          vim.tbl_extend("force", opts, { desc = "Code Actions" }))
+        
+        -- Rename
+        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename,
+          vim.tbl_extend("force", opts, { desc = "Rename Symbol" }))
+
+        -- Signature help
+        vim.keymap.set("n", "<C-h>", vim.lsp.buf.signature_help,
+          vim.tbl_extend("force", opts, { desc = "Signature Help" }))
       end,
     })
 
