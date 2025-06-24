@@ -1,5 +1,6 @@
 -- ~/.config/nvim/lua/keymaps.lua
 local map = vim.keymap.set
+local set_keymap = vim.api.nvim_set_keymap
 
 -- Telescope's built-in pickers
 map("n", "<leader>ff", function()
@@ -97,7 +98,7 @@ map('n', '<leader>y', '"+y', { desc = 'Yank into " register' })
 map('v', '<leader>y', '"+y', { desc = 'Yank into " register' })
 map('n', '<leader>Y', '"+Y', { desc = 'Yank into " register' })
 -- map('n', '<leader>ya', 'gg<S-v><S-g>"+Y', { desc = 'Yank all into " register' })
-map('n', '<leader>ya', 'gg<S-v><S-g><leader>Y', { desc = 'Yank all into " register' })
+-- map('n', '<leader>as', 'gg<S-v><S-g><leader>"+y', { desc = 'Yank all into " register' })
 
 -- reeplace everything
 map("n", "<leader>ca", 'gg<S-v><S-g>d"*p', { desc = 'Paste everything in the paper " register' })
@@ -132,27 +133,31 @@ map("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs" })
 map("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
 map("n", "<leader>gr", vim.lsp.buf.references, { desc = "List References" })
 map("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" })
---
+
+-- Code Actions and Refactoring
+map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
+map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
+map("n", "<leader>rs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
 
 -- toggleterm keymaps
-vim.api.nvim_set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })
+set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })
 
 -- indentation buttons keymaps
 -- --
-vim.api.nvim_set_keymap('v', '>', '>gv', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<', '<gv', { noremap = true, silent = true })
+set_keymap('v', '>', '>gv', { noremap = true, silent = true })
+set_keymap('v', '<', '<gv', { noremap = true, silent = true })
 
 -- Quote/bracket selection helpers (Normal mode)
-vim.keymap.set('n', '{', 'vi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
-vim.keymap.set('n', '}', 'va"', { noremap = true, silent = true, nowait = true, desc = 'Select around ""' })
-vim.keymap.set('n', '[', "va'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
-vim.keymap.set('n', ']', "vi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
+map('n', '{', 'vi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+map('n', '}', 'va"', { noremap = true, silent = true, nowait = true, desc = 'Select around ""' })
+map('n', '[', "va'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
+map('n', ']', "vi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
 
 -- Quote/bracket selection helpers (Visual mode)
-vim.keymap.set('v', '{', '<Esc>llvi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
-vim.keymap.set('v', '}', '<Esc>llva"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
-vim.keymap.set('v', '[', "<Esc>llva'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
-vim.keymap.set('v', ']', "<Esc>llvi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
+map('v', '{', '<Esc>llvi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+map('v', '}', '<Esc>llva"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+map('v', '[', "<Esc>llva'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
+map('v', ']', "<Esc>llvi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
 
 
 -- No special mappings in visual mode for { } now
