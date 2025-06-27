@@ -148,16 +148,21 @@ set_keymap('v', '>', '>gv', { noremap = true, silent = true })
 set_keymap('v', '<', '<gv', { noremap = true, silent = true })
 
 -- Quote/bracket selection helpers (Normal mode)
-map('n', '{', 'vi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
-map('n', '}', 'va"', { noremap = true, silent = true, nowait = true, desc = 'Select around ""' })
-map('n', '[', "va'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
-map('n', ']', "vi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
-
--- Quote/bracket selection helpers (Visual mode)
-map('v', '{', '<Esc>llvi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
-map('v', '}', '<Esc>llva"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
-map('v', '[', "<Esc>llva'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
-map('v', ']', "<Esc>llvi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
+-- map('n', '{', 'vi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+-- map('n', '}', 'va"', { noremap = true, silent = true, nowait = true, desc = 'Select around ""' })
+-- map('n', '[', "va'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
+-- map('n', ']', "vi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
+--
+-- -- Quote/bracket selection helpers (Visual mode)
+-- map('v', '{', '<Esc>llvi"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+-- map('v', '}', '<Esc>llva"', { noremap = true, silent = true, nowait = true, desc = 'Select inside ""' })
+-- map('v', '[', "<Esc>llva'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
+-- map('v', ']', "<Esc>llvi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
+--
+--
+-- map('n', '}', 'va"', { noremap = true, silent = true, nowait = true, desc = 'Select around ""' })
+-- map('n', '[', "va'", { noremap = true, silent = true, nowait = true, desc = "Select around ''" })
+-- map('n', ']', "vi'", { noremap = true, silent = true, nowait = true, desc = "Select inside ''" })
 
 
 -- No special mappings in visual mode for { } now
@@ -204,6 +209,50 @@ map('n', '<leader>fk',
   require('telescope.builtin').resume,
   { silent = true, desc = 'Resume last Telescope search' }
 )
+
+-- viw -> selects the word
+-- "*y -> yanks the word
+-- <leader>fg opens the `live grep` finder
+-- <D-v> pastes the copied word
+
+map('n', '{', function()
+  local word = vim.fn.expand("<cword>")
+  require('telescope.builtin').live_grep({ default_text = word })
+end, { desc = 'Live grep for word under cursor' })
+
+map('v', '{', function()
+  local text = get_visual_selection()
+  require('telescope.builtin').live_grep({ default_text = text })
+end, { desc = 'Live grep for visual selection' })
+
+-- map('v', '{', function()
+--   -- Get visual selection
+--   local s = vim.fn.getreg("v")                    -- backup visual register
+--   vim.cmd('normal! "vy')                          -- yank visual selection into "v
+--   local text = vim.fn.getreg("v"):gsub("\n", " ") -- get and sanitize
+--   vim.fn.setreg("v", s)                           -- restore register
+--   require('telescope.builtin').live_grep({ default_text = text })
+-- end, { desc = 'Live grep for visual selection' })
+
+map('n', '}', function()
+  local word = vim.fn.expand("<cword>")
+  require('telescope.builtin').find_files({ default_text = word })
+end, { desc = 'Find files with word under cursor' })
+
+map('v', '}', function()
+  local text = get_visual_selection()
+  require('telescope.builtin').find_files({ default_text = text })
+end, { desc = 'Find files with visual selection' })
+
+-- map('v', '}', function()
+--   local s = vim.fn.getreg("v")
+--   vim.cmd('normal! "vy')
+--   local text = vim.fn.getreg("v"):gsub("\n", " ")
+--   vim.fn.setreg("v", s)
+--   require('telescope.builtin').find_files({ default_text = text })
+-- end, { desc = 'Find files with visual selection' })
+
+-- word to search
 
 --
 --
