@@ -5,8 +5,6 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.o.relativenumber = true
 
-
-
 -- vim.opt.swapfile = true
 -- vim.opt.directory = os.getenv("HOME") .. "/.config/nvim/swap//"
 vim.opt.swapfile = false
@@ -78,6 +76,26 @@ vim.opt.expandtab = true
 
 vim.opt.smartindent = true
 vim.opt.wrap = true
+
+function get_visual_selection()
+  -- Save current register
+  local saved_reg = vim.fn.getreg('"')
+  local saved_regtype = vim.fn.getregtype('"')
+  
+  -- Yank the visual selection to the unnamed register
+  vim.cmd('normal! ""y')
+  
+  -- Get the yanked text
+  local text = vim.fn.getreg('"')
+  
+  -- Restore the register
+  vim.fn.setreg('"', saved_reg, saved_regtype)
+  
+  -- Clean up the text (remove newlines and extra spaces)
+  text = text:gsub('\n', ' '):gsub('%s+', ' '):gsub('^%s+', ''):gsub('%s+$', '')
+  
+  return text
+end
 
 -- vim.o.number = true
 -- vim.keymap.set("n", "<Space>", "", { noremap = true })
