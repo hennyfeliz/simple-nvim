@@ -22,7 +22,7 @@ return {
         cpp = { "clang_format" },
         sh = { "shfmt" },
         go = { "gofmt" },
-        java = { "google_java_format" },
+        java = { "clang_format" },
         rust = { "rustfmt", "rust_hdl" },
       },
       formatters = {
@@ -38,14 +38,10 @@ return {
           prepend_args = { "--indent-width", "2" },
         },
         clang_format = {
-          prepend_args = { "--style={IndentWidth: 2, UseTab: Never}" },
+          prepend_args = { "--style={IndentWidth: 4, UseTab: Never}" },
         },
         shfmt = {
           prepend_args = { "-i", "2" },
-        },
-        google_java_format = {
-          -- google-java-format does not support config via CLI for indent size,
-          -- you’ll need to use the default or switch to clang-format for Java if critical
         },
         rustfmt = {
           command = "rustfmt",
