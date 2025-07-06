@@ -5,6 +5,12 @@ return {
     vim.api.nvim_create_autocmd("FileType", {
       pattern = "java",
       callback = function()
+        -- Set Java-specific indentation settings
+        vim.opt_local.tabstop = 4
+        vim.opt_local.softtabstop = 4
+        vim.opt_local.shiftwidth = 4
+        vim.opt_local.expandtab = true
+        
         local mason_path = vim.fn.stdpath("data") .. "/mason/packages"
         local jdtls_path = mason_path .. "/jdtls"
         
