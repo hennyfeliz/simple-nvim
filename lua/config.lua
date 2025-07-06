@@ -1,3 +1,14 @@
+-- Global LSP compatibility fix for Neovim < 0.10
+-- This prevents the "bad argument #1 to 'ipairs' (table expected, got nil)" error
+if vim.lsp._request_name_to_capability == nil then
+  vim.lsp._request_name_to_capability = setmetatable({}, {
+    __index = function(_, key)
+      -- Always return an empty table so ipairs() doesn't fail
+      return {}
+    end,
+  })
+end
+
 require("nvim-treesitter.install").compilers = { "zig" }
 local servers = require("servers.config")
 

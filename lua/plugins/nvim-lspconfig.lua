@@ -1,5 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
+  enabled = false, -- DISABLED - causing crashes
   dependencies = {
     "stevearc/conform.nvim",
     "williamboman/mason.nvim",
@@ -25,6 +26,15 @@ return {
   },
 
   config = function()
+    -- LSP compatibility fix
+    if vim.lsp._request_name_to_capability == nil then
+      vim.lsp._request_name_to_capability = setmetatable({}, {
+        __index = function(_, key)
+          return {}
+        end,
+      })
+    end
+
     -- Setup formatters
     require("conform").setup({ formatters_by_ft = {} })
 
@@ -34,7 +44,28 @@ return {
     -- Mason setup
     require("mason").setup()
     require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls", "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "typescript-language-server", "jdtls" },
+      ensure_installed = { "lua_ls" }, -- Only essential servers for now
+    })
+
+    -- Lua LSP setup
+    require("lspconfig").lua_ls.setup({
+      capabilities = capabilities,
+      settings = {
+        Lua = {
+          runtime = { version = "LuaJIT" },
+          diagnostics = { globals = { "vim" } },
+          workspace = {
+            library = vim.api.nvim_get_runtime_file("", true),
+            checkThirdParty = false,
+          },
+          telemetry = { enable = false },
+        },
+      },
+    })
+
+    -- Mason setup for other servers
+    require("mason-lspconfig").setup({
+      ensure_installed = { "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "typescript-language-server", "jdtls" },
       handlers = {
         function(server_name)
           require("lspconfig")[server_name].setup({ capabilities = capabilities })
@@ -60,20 +91,6 @@ return {
           })
         end,
 
-        ["lua_ls"] = function()
-          require("lspconfig").lua_ls.setup({
-            capabilities = capabilities,
-            settings = {
-              Lua = {
-                runtime = { version = "Lua 5.1" },
-                diagnostics = {
-                  globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
-                },
-              },
-            },
-          })
-        end,
-
         ["zls"] = function()
           local lspconfig = require("lspconfig")
           lspconfig.zls.setup({
@@ -88,7 +105,7 @@ return {
           })
           vim.g.zig_fmt_parse_errors = 0
           vim.g.zig_fmt_autosave = 0
-                end,
+        end,
 
         ["jdtls"] = function()
           -- Skip jdtls here - handled by nvim-jdtls plugin
@@ -129,16 +146,14 @@ return {
 
     -- TypeScript is now handled in the ts_ls handler above
 
-
+    -- LSP keymaps and autocmds
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(args)
         local c = vim.lsp.get_client_by_id(args.data.client_id)
-        if not c then
-          return
-        end
+        if not c then return end
 
-        -- Format on save for Lua
-        if vim.bo.filetype == "lua" then
+        -- Format on save for supported clients
+        if c.supports_method("textDocument/formatting") then
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = args.buf,
             callback = function()
@@ -148,30 +163,10 @@ return {
         end
 
         -- LSP keymaps
-        local buf = args.buf
-        local opts = { buffer = buf, noremap = true, silent = true }
-
-        -- Navigation
-        vim.keymap.set("n", "J", vim.lsp.buf.definition,
-          vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
-        vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references,
-          vim.tbl_extend("force", opts, { desc = "Find References" }))
-        vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation,
-          vim.tbl_extend("force", opts, { desc = "Go to Implementation" }))
-        vim.keymap.set("n", "K", vim.lsp.buf.hover,
-          vim.tbl_extend("force", opts, { desc = "Hover Docs" }))
-
-        -- Code actions
-        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,
-          vim.tbl_extend("force", opts, { desc = "Code Actions" }))
-        
-        -- Rename
-        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename,
-          vim.tbl_extend("force", opts, { desc = "Rename Symbol" }))
-
-        -- Signature help
-        vim.keymap.set("n", "<C-h>", vim.lsp.buf.signature_help,
-          vim.tbl_extend("force", opts, { desc = "Signature Help" }))
+        local opts = { buffer = args.buf, silent = true }
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover" }))
+        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Action" }))
+        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
       end,
     })
 

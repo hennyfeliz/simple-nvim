@@ -35,7 +35,7 @@ return {
             "-Declipse.product=org.eclipse.jdt.ls.core.product",
             "-Dlog.protocol=true",
             "-Dlog.level=ALL",
-            "-Xmx1g",
+            "-Xmx2g", -- Increased memory for better performance
             "--add-modules=ALL-SYSTEM",
             "--add-opens", "java.base/java.util=ALL-UNNAMED",
             "--add-opens", "java.base/java.lang=ALL-UNNAMED",
@@ -44,31 +44,83 @@ return {
             "-data", vim.fn.stdpath("data") .. "/jdtls-workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
           },
           
-          root_dir = vim.fs.dirname(vim.fs.find({'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle'}, { upward = true })[1]),
+          -- Improved root directory detection
+          root_dir = vim.fs.dirname(vim.fs.find({'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'settings.gradle'}, { upward = true })[1]) or vim.fn.getcwd(),
           
           settings = {
             java = {
               signatureHelp = { enabled = true },
               contentProvider = { preferred = 'fernflower' },
+              
+              -- CRITICAL: Enable Maven/Gradle source downloads
+              maven = {
+                downloadSources = true,
+                updateSnapshots = true,
+              },
+              gradle = {
+                downloadSources = true,
+              },
+              
+              -- Auto-update build configuration when pom.xml/build.gradle changes
+              configuration = {
+                updateBuildConfiguration = "automatic",
+              },
+              
+              -- Enable automatic dependency resolution
+              autobuild = { enabled = true },
+              
+              -- Import and organize imports automatically
+              -- saveActions = {
+              --   organizeImports = true,
+              -- },
             }
           },
           
           init_options = {
-            bundles = {}
+            bundles = {},
+            -- Enable extended client capabilities
+            extendedClientCapabilities = {
+              progressReportsSupport = true,
+              classFileContentsSupport = true,
+              generateToStringPromptSupport = true,
+              hashCodeEqualsPromptSupport = true,
+              advancedExtractRefactoringSupport = true,
+              advancedOrganizeImportsSupport = true,
+              generateConstructorsPromptSupport = true,
+              generateDelegateMethodsPromptSupport = true,
+              moveRefactoringSupport = true,
+            },
           },
           
-          capabilities = require("blink.cmp").get_lsp_capabilities(),
+          -- Minimal capabilities to avoid LSP conflicts
+          capabilities = {
+            textDocument = {
+              completion = {
+                completionItem = {
+                  snippetSupport = true,
+                },
+              },
+            },
+          },
           
           on_attach = function(client, bufnr)
+            -- Essential Java keymaps only
             local opts = { buffer = bufnr, silent = true }
-            vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, opts)
-            vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-            vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-            vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-            vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
             
-            -- Java specific
-            vim.keymap.set('n', '<leader>jo', "<Cmd>lua require'jdtls'.organize_imports()<CR>", opts)
+            -- Core LSP functions
+            vim.keymap.set('n', 'K', vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover Documentation" }))
+            vim.keymap.set('n', 'gd', vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
+            vim.keymap.set('n', 'gr', vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Find References" }))
+            vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Actions" }))
+            vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename Symbol" }))
+            
+            -- Java-specific commands
+            vim.keymap.set('n', '<leader>jo', "<Cmd>lua require'jdtls'.organize_imports()<CR>", vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
+            vim.keymap.set('n', '<leader>jc', "<Cmd>lua require'jdtls'.compile('full')<CR>", vim.tbl_extend("force", opts, { desc = "Compile Project" }))
+            vim.keymap.set('n', '<leader>ju', "<Cmd>JdtUpdateConfig<CR>", vim.tbl_extend("force", opts, { desc = "Update Project Config" }))
+            
+            -- Notify when ready
+            vim.notify("Java LSP attached successfully!", vim.log.levels.INFO)
           end,
         }
         

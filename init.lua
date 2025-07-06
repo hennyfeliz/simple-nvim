@@ -1,3 +1,13 @@
+-- CRITICAL: LSP compatibility fix must be loaded FIRST
+-- This prevents crashes on Neovim < 0.10
+if vim.lsp._request_name_to_capability == nil then
+  vim.lsp._request_name_to_capability = setmetatable({}, {
+    __index = function(_, key)
+      return {}
+    end,
+  })
+end
+
 -- cursor config
 vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver50,r-cr:hor20,o:hor50"
 
