@@ -26,7 +26,7 @@ return require("lazy").setup({
   require("plugins.catppuccin"),
   require("plugins.playground"),
   require("plugins.luasnip"),
-  require("plugins.markview"),
+  -- require("plugins.markview"),
   require("plugins.nvim-tree"),
   require("plugins.toggleterm"),
   require("plugins.dadbod"),
