@@ -75,11 +75,15 @@ map({ "n", "v" }, "<leader>f", function()
   require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Format file or range" })
 
--- FORMAT CODE KEYBINDS
---
+-- FORMAT CODE KEYBINDS - Works for all file types
 map({ "n", "v" }, "<leader>fm", function()
   require("conform").format({ async = true, lsp_fallback = true })
-end, { desc = "Format file or range" })
+end, { desc = "Format code" })
+
+-- ORGANIZE IMPORTS - Separate from formatting
+map("n", "<leader>jo", function()
+  vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } } })
+end, { desc = "Organize imports" })
 
 --
 -- LSP CONFIG KEYBINDS
