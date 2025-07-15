@@ -4,16 +4,14 @@ return {
   event = { "BufWritePre" },
   config = function()
     require("conform").setup({
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_fallback = true,
-      },
+      -- Disable format_on_save to give manual control
+      format_on_save = false,
       formatters_by_ft = {
         lua = { "stylua" },
-        javascript = { "eslint_d", "prettier" },
-        typescript = { "eslint_d", "prettier" },
-        javascriptreact = { "eslint_d", "prettier" },
-        typescriptreact = { "eslint_d", "prettier" },
+        javascript = { "prettier" },
+        typescript = { "prettier" },
+        javascriptreact = { "prettier" },
+        typescriptreact = { "prettier" },
         json = { "prettier" },
         html = { "prettier" },
         css = { "prettier" },
@@ -22,15 +20,11 @@ return {
         cpp = { "clang_format" },
         sh = { "shfmt" },
         go = { "gofmt" },
-        java = { "clang_format" },
-        rust = { "rustfmt", "rust_hdl" },
+        -- Java formatting handled by LSP
+        java = {},
+        rust = { "rustfmt" },
       },
       formatters = {
-        eslint_d = {
-          command = "eslint_d",
-          args = { "--fix" },
-          stdin = false,
-        },
         prettier = {
           prepend_args = { "--tab-width", "2", "--use-tabs", "false" },
         },
@@ -46,11 +40,6 @@ return {
         rustfmt = {
           command = "rustfmt",
           args = { "--edition", "2021" },
-          stdin = true,
-        },
-        rust_hdl = {
-          command = "rust_hdl",
-          args = { "--format", "verilog" },
           stdin = true,
         },
       },
