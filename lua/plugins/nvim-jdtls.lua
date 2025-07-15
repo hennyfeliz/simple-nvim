@@ -2,136 +2,163 @@ return {
   "mfussenegger/nvim-jdtls",
   ft = { "java" },
   config = function()
+    -- Define a reusable start function
+    local function start_jdtls()
+      local jdtls = require("jdtls")
+      
+      -- Locate a Java 21+ executable. Prefer $JAVA_HOME, else rely on PATH, else fallback hard-coded.
+      local function detect_java()
+        local env_java_home = vim.env.JAVA_HOME and (vim.env.JAVA_HOME .. "/bin/java.exe")
+        if env_java_home and vim.fn.executable(env_java_home) == 1 then
+          return env_java_home
+        end
+        local sys_java = vim.fn.exepath("java")
+        if sys_java ~= "" then
+          return sys_java
+        end
+        -- Hard-coded fallback – EDIT if you placed JDK elsewhere
+        return "C:/Program Files/Java/jdk-21/bin/java.exe"
+      end
+      local java_cmd = detect_java()
+      
+      -- Paths
+      local mason_path = vim.fn.stdpath("data") .. "/mason/packages"
+      local jdtls_path = mason_path .. "/jdtls"
+      -- Dynamically resolve the launcher JAR (version changes frequently)
+      local launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+
+      -- Use config_win if available, otherwise fall back to config_linux
+      local config_path = jdtls_path .. "/config_win"
+      if vim.fn.isdirectory(config_path) == 0 then
+        config_path = jdtls_path .. "/config_linux"
+      end
+
+      -- Determine project root (supports Maven/Gradle/Quarkus)
+      local root_dir = jdtls.setup.find_root({ "pom.xml", "mvnw", "gradlew", "build.gradle", "settings.gradle", ".git" })
+        or vim.fn.getcwd()
+
+      -- Workspace directory – one per project
+      local project_name = vim.fn.fnamemodify(root_dir, ":t")
+      local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
+
+      -- Try to locate a Lombok JAR on the local machine (for Quarkus & others)
+      local function find_lombok_jar()
+        local home = vim.fn.expand("~")
+        local pattern = home .. "/.m2/repository/org/projectlombok/lombok/*/lombok-*.jar"
+        local jars = vim.fn.glob(pattern, 1, 1)
+        if #jars > 0 then
+          table.sort(jars)
+          return jars[#jars] -- newest version
+        end
+      end
+      local lombok_jar = find_lombok_jar()
+
+      -- Build the command array for jdtls
+      local cmd = {
+        java_cmd,
+        "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+        "-Dosgi.bundles.defaultStartLevel=4",
+        "-Declipse.product=org.eclipse.jdt.ls.core.product",
+        "-Dlog.level=ALL",
+        "-Xmx1g",
+        "--add-modules=ALL-SYSTEM",
+        "--add-opens", "java.base/java.util=ALL-UNNAMED",
+        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+      }
+
+      -- Inject Lombok if found (fixes missing symbols & completions)
+      if lombok_jar and #lombok_jar > 0 then
+        table.insert(cmd, 2, "-Xbootclasspath/a:" .. lombok_jar)
+        table.insert(cmd, 2, "-javaagent:" .. lombok_jar)
+      end
+
+      -- Finish building the command
+      vim.list_extend(cmd, {
+        "-jar", launcher_jar,
+        "-configuration", config_path,
+        "-data", workspace_dir,
+      })
+      
+      local config = {
+        cmd = cmd,
+        root_dir = root_dir,
+        settings = {
+          java = {
+            eclipse = {
+              downloadSources = true,
+            },
+            configuration = {
+              updateBuildConfiguration = "interactive",
+            },
+            maven = {
+              downloadSources = true,
+            },
+            format = {
+              enabled = true,
+            },
+            saveActions = {
+              organizeImports = false,
+            },
+          },
+        },
+        init_options = {
+          bundles = {},
+        },
+        capabilities = (function()
+          local capabilities = vim.lsp.protocol.make_client_capabilities()
+          local ok_cmp, cmp_lsp = pcall(require, "cmp_nvim_lsp")
+          if ok_cmp then
+            capabilities = cmp_lsp.default_capabilities(capabilities)
+          end
+          return capabilities
+        end)(),
+        on_attach = function(client, bufnr)
+          local opts = { buffer = bufnr, silent = true }
+          
+          -- LSP mappings
+          vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+          vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+          vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+          vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+          vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+          vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
+          vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+          vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+          
+          -- Format function
+          vim.keymap.set("n", "<leader>fm", function()
+            vim.lsp.buf.format({ async = true })
+          end, { buffer = bufnr, silent = true, desc = "Format Java code" })
+          
+          -- Organize imports function
+          vim.keymap.set("n", "<leader>jo", function()
+            require('jdtls').organize_imports()
+          end, { buffer = bufnr, silent = true, desc = "Organize imports" })
+        end,
+        -- Add error and exit handlers for debugging
+        on_error = function(err)
+          vim.notify("JDTLS error: " .. vim.inspect(err), vim.log.levels.ERROR)
+        end,
+        on_exit = function(code, signal)
+          vim.notify(string.format("JDTLS exited (code=%s, signal=%s)", code, signal), vim.log.levels.WARN)
+        end,
+      }
+      
+      -- Start JDTLS
+      jdtls.start_or_attach(config)
+    end
+
+    -- 1. Run immediately for the current buffer (when plugin has just loaded via ft=java)
+    if vim.bo.filetype == "java" then
+      start_jdtls()
+    end
+
+    -- 2. Register for future Java buffers
     vim.api.nvim_create_autocmd("FileType", {
       pattern = "java",
-      callback = function()
-        -- Set Java-specific indentation settings
-        vim.opt_local.tabstop = 4
-        vim.opt_local.softtabstop = 4
-        vim.opt_local.shiftwidth = 4
-        vim.opt_local.expandtab = true
-        
-        local mason_path = vim.fn.stdpath("data") .. "/mason/packages"
-        local jdtls_path = mason_path .. "/jdtls"
-        
-        -- Find jar file
-        local jar_patterns = {
-          jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar",
-        }
-        
-        local jar_file = ""
-        for _, pattern in ipairs(jar_patterns) do
-          local found = vim.fn.glob(pattern)
-          if found ~= "" then
-            jar_file = found
-            break
-          end
-        end
-        
-        if jar_file == "" then
-          vim.notify("JDTLS jar file not found", vim.log.levels.ERROR)
-          return
-        end
-        
-        local config = {
-          cmd = {
-            "java",
-            "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-            "-Dosgi.bundles.defaultStartLevel=4", 
-            "-Declipse.product=org.eclipse.jdt.ls.core.product",
-            "-Dlog.protocol=true",
-            "-Dlog.level=ALL",
-            "-Xmx2g", -- Increased memory for better performance
-            "--add-modules=ALL-SYSTEM",
-            "--add-opens", "java.base/java.util=ALL-UNNAMED",
-            "--add-opens", "java.base/java.lang=ALL-UNNAMED",
-            "-jar", jar_file,
-            "-configuration", jdtls_path .. "/config_" .. (vim.fn.has("win32") == 1 and "win" or "linux"),
-            "-data", vim.fn.stdpath("data") .. "/jdtls-workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
-          },
-          
-          -- Improved root directory detection
-          root_dir = vim.fs.dirname(vim.fs.find({'.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'settings.gradle'}, { upward = true })[1]) or vim.fn.getcwd(),
-          
-          settings = {
-            java = {
-              signatureHelp = { enabled = true },
-              contentProvider = { preferred = 'fernflower' },
-              
-              -- CRITICAL: Enable Maven/Gradle source downloads
-              maven = {
-                downloadSources = true,
-                updateSnapshots = true,
-              },
-              gradle = {
-                downloadSources = true,
-              },
-              
-              -- Auto-update build configuration when pom.xml/build.gradle changes
-              configuration = {
-                updateBuildConfiguration = "automatic",
-              },
-              
-              -- Enable automatic dependency resolution
-              autobuild = { enabled = true },
-              
-              -- Import and organize imports automatically
-              -- saveActions = {
-              --   organizeImports = true,
-              -- },
-            }
-          },
-          
-          init_options = {
-            bundles = {},
-            -- Enable extended client capabilities
-            extendedClientCapabilities = {
-              progressReportsSupport = true,
-              classFileContentsSupport = true,
-              generateToStringPromptSupport = true,
-              hashCodeEqualsPromptSupport = true,
-              advancedExtractRefactoringSupport = true,
-              advancedOrganizeImportsSupport = true,
-              generateConstructorsPromptSupport = true,
-              generateDelegateMethodsPromptSupport = true,
-              moveRefactoringSupport = true,
-            },
-          },
-          
-          -- Minimal capabilities to avoid LSP conflicts
-          capabilities = {
-            textDocument = {
-              completion = {
-                completionItem = {
-                  snippetSupport = true,
-                },
-              },
-            },
-          },
-          
-          on_attach = function(client, bufnr)
-            -- Essential Java keymaps only
-            local opts = { buffer = bufnr, silent = true }
-            
-            -- Core LSP functions
-            vim.keymap.set('n', 'K', vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover Documentation" }))
-            vim.keymap.set('n', 'gd', vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
-            vim.keymap.set('n', 'gr', vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Find References" }))
-            vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Actions" }))
-            vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename Symbol" }))
-            
-            -- Java-specific commands
-            vim.keymap.set('n', '<leader>jo', "<Cmd>lua require'jdtls'.organize_imports()<CR>", vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
-            vim.keymap.set('n', '<leader>jc', "<Cmd>lua require'jdtls'.compile('full')<CR>", vim.tbl_extend("force", opts, { desc = "Compile Project" }))
-            vim.keymap.set('n', '<leader>ju', "<Cmd>JdtUpdateConfig<CR>", vim.tbl_extend("force", opts, { desc = "Update Project Config" }))
-            
-            -- Notify when ready
-            vim.notify("Java LSP attached successfully!", vim.log.levels.INFO)
-          end,
-        }
-        
-        require("jdtls").start_or_attach(config)
-      end,
+      callback = start_jdtls,
     })
   end,
 } 
