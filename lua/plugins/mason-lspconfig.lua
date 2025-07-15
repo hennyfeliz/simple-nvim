@@ -1,7 +1,6 @@
--- (Optional) mason-lspconfig if you want LSP integration
+-- Mason LSP Config - manages LSP servers and formatters
 return {
   "williamboman/mason-lspconfig.nvim",
-  enabled = false, -- DISABLED - causing crashes
   dependencies = { "williamboman/mason.nvim" },
   config = function()
     -- LSP compatibility fix
@@ -13,6 +12,19 @@ return {
       })
     end
     
-    require("mason-lspconfig").setup()
+    require("mason-lspconfig").setup({
+      -- Ensure these LSP servers are installed
+      ensure_installed = {
+        "jdtls",           -- Java Language Server
+        "ts_ls",           -- TypeScript/JavaScript LSP
+        "eslint",          -- ESLint LSP
+        "html",            -- HTML LSP
+        "cssls",           -- CSS LSP
+        "jsonls",          -- JSON LSP
+        "lua_ls",          -- Lua LSP
+      },
+      -- Auto-install LSP servers
+      automatic_installation = true,
+    })
   end,
 }
