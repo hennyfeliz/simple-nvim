@@ -8,6 +8,8 @@ return {
       -- remove titles
       results_title = false,
       preview_title = false,
+      -- ordenar desde arriba hacia abajo (normal)
+      sorting_strategy = "ascending",
     })
 
     -- custom border: only a vertical line between results & preview
@@ -30,5 +32,44 @@ return {
     ivy.path_display = parentdir_filename
 
     opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, ivy)
-  end,
+
+  -- custom helper to show only parentdir/filename
+    local function parentdir_filename(_, path)
+      local fname = vim.fn.fnamemodify(path, ':t')        -- filename
+      local parent = vim.fn.fnamemodify(path, ':h:t')     -- parent dir tail
+      if parent == '.' or parent == '' then
+        return fname
+      end
+      return parent .. '/' .. fname
+    end
+
+    -- CONFIGURACIÓN DEFAULTS (aplicará a todos los pickers)
+    opts.defaults = {
+      -- Aplicar tema ivy por defecto
+      layout_strategy = "bottom_pane",
+      sorting_strategy = "ascending",
+      layout_config = {
+        height = 0.30,
+        preview_width = 0.7,
+        preview_cutoff = 1,
+      },
+      
+      -- Configurar preview
+      preview = {
+        check_mime_type = false,
+        filesize_limit = 0.1,
+      },
+      
+      -- Títulos
+      results_title = false,
+      preview_title = false,
+      
+      -- Bordes personalizados: solo línea vertical entre resultados y preview
+      borderchars = {
+        prompt = { " ", " ", " ", " ", " ", " ", " ", " " },
+        results = { " ", " ", " ", " ", " ", " ", " ", " " },
+        preview = { " ", "│", " ", " ", " ", " ", " ", " " },
+      }, 
+    }
+    end,
 }
