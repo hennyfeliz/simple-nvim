@@ -15,7 +15,7 @@ return {
     require("mason-lspconfig").setup({
       -- Ensure these LSP servers are installed
       ensure_installed = {
-        "jdtls",           -- Java Language Server
+        -- "jdtls",           -- Java Language Server
         "ts_ls",           -- TypeScript/JavaScript LSP
         "eslint",          -- ESLint LSP
         "html",            -- HTML LSP
