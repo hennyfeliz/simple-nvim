@@ -12,7 +12,24 @@ end
 require("nvim-treesitter.install").compilers = { "zig" }
 local servers = require("servers.config")
 
-vim.cmd.colorscheme("onedark")
+require("catppuccin").setup({
+  flavour = "mocha", -- Puede ser "latte", "frappe", "macchiato", "mocha"
+  background = {
+    light = "latte",
+    dark = "mocha",
+  },
+  integrations = {
+    cmp = true,
+    gitsigns = true,
+    telescope = true,
+    treesitter = true,
+    -- agrega más si usas otros plugins
+  },
+})
+
+-- vim.cmd.colorscheme "catppuccin"
+vim.cmd.colorscheme("catppuccin")
+
 local cmp = require("cmp")
 local actions = require("telescope.actions")
 local status, lualine = pcall(require, "lualine")
@@ -191,7 +208,7 @@ require("nvim-web-devicons").setup({
   require("lualine").setup({
     options = {
       icons_enabled = true,
-      theme = "onedark",
+      theme = "catppuccin",
       section_separators = { left = "", right = "" },
       component_separators = { left = "", right = "" },
       disabled_filetypes = {},
