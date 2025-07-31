@@ -12,23 +12,23 @@ end
 require("nvim-treesitter.install").compilers = { "zig" }
 local servers = require("servers.config")
 
-require("catppuccin").setup({
-  flavour = "mocha", -- Puede ser "latte", "frappe", "macchiato", "mocha"
-  background = {
-    light = "latte",
-    dark = "mocha",
-  },
-  integrations = {
-    cmp = true,
-    gitsigns = true,
-    telescope = true,
-    treesitter = true,
-    -- agrega más si usas otros plugins
-  },
-})
+-- require("catppuccin").setup({
+--   flavour = "mocha", -- Puede ser "latte", "frappe", "macchiato", "mocha"
+--   background = {
+--     light = "latte",
+--     dark = "mocha",
+--   },
+--   integrations = {
+--     cmp = true,
+--     gitsigns = true,
+--     telescope = true,
+--     treesitter = true,
+--     -- agrega más si usas otros plugins
+--   },
+-- })
 
 -- vim.cmd.colorscheme "catppuccin"
-vim.cmd.colorscheme("catppuccin")
+-- vim.cmd.colorscheme("catppuccin")
 
 local cmp = require("cmp")
 local actions = require("telescope.actions")
