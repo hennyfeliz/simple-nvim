@@ -1,5 +1,4 @@
 # simple-nvim
-
 Mason installed plugins
     ◍ copilot-language-server
     ◍ eslint-lsp eslint, eslint
