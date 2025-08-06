@@ -1,95 +1,260 @@
--- ~/.config/nvim/lua/snippets/java.lua
-local ls = require("luasnip")
-local s = ls.snippet
-local t = ls.text_node
-local i = ls.insert_node
+-- Improved and extended Java snippets for LuaSnip
+
+local luasnip = require("luasnip")
+local snippet = luasnip.snippet
+local text_node = luasnip.text_node
+local insert_node = luasnip.insert_node
 local rep = require("luasnip.extras").rep
+local fmt = require("luasnip.extras.fmt").fmt
+local func = luasnip.function_node
+
+-- Capitalize helper
+local function capitalize(args)
+  local str = args[1][1] or ""
+  return (str:gsub("^%l", string.upper))
+end
 
 return {
-  s("main", {
-    t({ "public static void main(String[] args) {", "    " }),
-    i(1, 'System.out.println("Hello")'),
-    t({ "", "}" }),
+  snippet("main", {
+    text_node({ "public static void main(String[] args) {", "    " }),
+    insert_node(1, 'System.out.println("Hello, world!");'),
+    text_node({ "", "}" }),
   }),
 
-  s("getter", {
-    t({ "public " }), i(1, "Type"), t({ " get" }), i(2, "FieldName"), t({ "() {", "    " }),
-    t({ "return this." }), i(3, "field"), t({ ";", "}" }),
+  snippet("getter", {
+    text_node("public "),
+    insert_node(1, "Type"),
+    text_node(" get"),
+    func(capitalize, { 2 }),
+    text_node({ "() {", "    return this." }),
+    insert_node(2, "field"),
+    text_node({ ";", "}" }),
   }),
 
-  s("setter", {
-    t({ "public void set" }), i(1, "FieldName"), t({ "(" }), i(2, "Type"), t({ " " }),
-    i(3, "field"), t({ ") {", "    " }), t({ "this." }), i(4, "field"), t({ " = " }),
-    i(5, "field"), t({ ";", "}" }),
+  snippet("setter", {
+    text_node("public void set"),
+    func(capitalize, { 1 }),
+    text_node("("),
+    insert_node(2, "Type"),
+    text_node(" "),
+    insert_node(1, "field"),
+    text_node({ ") {", "    this." }),
+    rep(1),
+    text_node(" = "),
+    rep(1),
+    text_node({ ";", "}" }),
   }),
 
-  s("constructor", {
-    t({ "public " }), i(1, "ClassName"), t({ "(" }), i(2, "Type"), t({ " " }), i(3, "field"),
-    t({ ") {", "    " }), t({ "this." }), i(4, "field"), t({ " = " }), i(5, "field"),
-    t({ ";", "}" }),
+  snippet("constructor", {
+    text_node("public "),
+    insert_node(1, "ClassName"),
+    text_node("("),
+    insert_node(2, "Type"),
+    text_node(" "),
+    insert_node(3, "field"),
+    text_node({ ") {", "    this." }),
+    rep(3),
+    text_node(" = "),
+    rep(3),
+    text_node({ ";", "}" }),
   }),
 
-  s("staticClass", {
-    t({ "public static class " }), i(1, "ClassName"), t({ " {", "    " }),
-    i(2, "Field"), t({ ";", "", "}" }),
+  snippet("staticClass", {
+    text_node("public static class "),
+    insert_node(1, "ClassName"),
+    text_node({ " {", "    " }),
+    insert_node(2, "// fields and methods"),
+    text_node({ "", "}" }),
   }),
 
-  s("staticInterface", {
-    t({ "public static interface " }), i(1, "InterfaceName"), t({ " {", "    " }),
-    i(2, "Method"), t({ "();", "", "}" }),
+  snippet("staticInterface", {
+    text_node("public static interface "),
+    insert_node(1, "InterfaceName"),
+    text_node({ " {", "    " }),
+    insert_node(2, "// method signatures"),
+    text_node({ "", "}" }),
   }),
 
-  -- Class template
-  s("class", {
-    t({ "public class " }), i(1, "ClassName"), t({ " {", "    // Fields", "    " }),
-    i(2, "private Type field;"), t({ "", "    // Constructors", "    " }),
-    i(3, "public ClassName() {}"), t({ "", "    // Methods", "    " }),
-    i(4, "public void foo() { }"), t({ "", "}" }),
+  snippet("class", {
+    text_node("public class "),
+    insert_node(1, "ClassName"),
+    text_node({ " {", "    // Fields", "    " }),
+    insert_node(2, "private Type field;"),
+    text_node({ "", "    // Constructors", "    " }),
+    insert_node(3, "public "),
+    rep(1),
+    text_node("() { }"),
+    text_node({ "", "    // Methods", "    " }),
+    insert_node(4, "public void foo() { }"),
+    text_node({ "", "}" }),
   }),
 
-  -- System.out shortcut
-  s("sout", {
-    t("System.out.println("), i(1, '"message"'), t({ ");" }),
+  snippet("sout", {
+    text_node("System.out.println("),
+    insert_node(1, '"message"'),
+    text_node({ ");" }),
   }),
 
-  -- Try-catch block
-  s("trycatch", {
-    t({ "try {", "    " }), i(1, "// code"), t({ "", "} catch (" }),
-    i(2, "Exception e"), t({ ") {", "    " }),
-    t({ "e.printStackTrace();" }), i(3, ""), t({ "", "}" }),
+  snippet("trycatch", {
+    text_node({ "try {", "    " }),
+    insert_node(1, "// code that may throw exception"),
+    text_node({ "", "} catch (" }),
+    insert_node(2, "Exception e"),
+    text_node({ ") {", "    e.printStackTrace();", "}" }),
   }),
 
-  -- For loop (index)
-  s("fori", {
-    t({ "for (int " }), i(1, "i"), t({ " = 0; " }), rep(1), t({ " < " }), i(2, "n"),
-    t({ "; " }), rep(1), t({ "++) {", "    " }),
-    i(3, "// TODO"), t({ "", "}" }),
+  snippet("trywith", {
+    text_node("try ("),
+    insert_node(1, "ResourceType resource = new ResourceType()"),
+    text_node({ ") {", "    " }),
+    insert_node(2, "// use resource"),
+    text_node({ "", "} catch (" }),
+    insert_node(3, "Exception e"),
+    text_node({ ") {", "    e.printStackTrace();", "}" }),
   }),
 
-  -- Enhanced for loop
-  s("foreach", {
-    t({ "for (" }), i(1, "Type"), t({ " " }), i(2, "item"), t({ " : " }),
-    i(3, "collection"), t({ ") {", "    " }), i(4, "// TODO"), t({ "", "}" }),
+  snippet("fori", {
+    text_node("for (int "),
+    insert_node(1, "i"),
+    text_node(" = 0; "),
+    rep(1),
+    text_node(" < "),
+    insert_node(2, "n"),
+    text_node("; "),
+    rep(1),
+    text_node({ "++) {", "    " }),
+    insert_node(3, "// TODO"),
+    text_node({ "", "}" }),
   }),
 
-  -- Enum template
-  s("enum", {
-    t({ "public enum " }), i(1, "EnumName"), t({ " {", "    " }),
-    i(2, "VALUE1, VALUE2;"), t({ "", "    // fields, constructors, methods", "    " }),
-    i(3, ""), t({ "", "}" }),
+  snippet("foreach", {
+    text_node("for ("),
+    insert_node(1, "Type"),
+    text_node(" "),
+    insert_node(2, "item"),
+    text_node(" : "),
+    insert_node(3, "collection"),
+    text_node({ ") {", "    " }),
+    insert_node(4, "// TODO"),
+    text_node({ "", "}" }),
   }),
 
-  -- Record template
-  s("record", {
-    t({ "public record " }), i(1, "RecordName"), t({ "(" }),
-    i(2, "Type field"), t({ ") {", "    " }),
-    i(3, "// body"), t({ "", "}" }),
+  snippet("enum", {
+    text_node("public enum "),
+    insert_node(1, "EnumName"),
+    text_node({ " {", "    " }),
+    insert_node(2, "VALUE1, VALUE2;"),
+    text_node({ "", "", "    // fields, constructors, methods", "    " }),
+    insert_node(3, "// TODO"),
+    text_node({ "", "}" }),
   }),
 
-  -- Static record template
-  s("staticRecord", {
-    t({ "public static record " }), i(1, "RecordName"), t({ "(" }),
-    i(2, "Type field"), t({ ") {", "    " }),
-    i(3, "// body"), t({ "", "}" }),
+  snippet("record", {
+    text_node("public record "),
+    insert_node(1, "RecordName"),
+    text_node("("),
+    insert_node(2, "Type field"),
+    text_node({ ") {", "    " }),
+    insert_node(3, "// additional methods"),
+    text_node({ "", "}" }),
+  }),
+
+  snippet("staticRecord", {
+    text_node("public static record "),
+    insert_node(1, "RecordName"),
+    text_node("("),
+    insert_node(2, "Type field"),
+    text_node({ ") {", "    " }),
+    insert_node(3, "// additional methods"),
+    text_node({ "", "}" }),
+  }),
+
+  snippet("sealedClass", {
+    text_node("public sealed class "),
+    insert_node(1, "ClassName"),
+    text_node(" permits "),
+    insert_node(2, "SubClass1, SubClass2"),
+    text_node({ " {", "    " }),
+    insert_node(3, "// class body"),
+    text_node({ "", "}" }),
+  }),
+
+  snippet("sealedInterface", {
+    text_node("public sealed interface "),
+    insert_node(1, "InterfaceName"),
+    text_node(" permits "),
+    insert_node(2, "ImplementingClass1, ImplementingClass2"),
+    text_node({ " {", "    " }),
+    insert_node(3, "// abstract methods"),
+    text_node({ "", "}" }),
+  }),
+
+  snippet("equhash", {
+    text_node("@Override\npublic boolean equals(Object obj) {\n    if (this == obj) return true;\n    if (obj == null || getClass() != obj.getClass()) return false;\n    "),
+    insert_node(1, "ClassName"),
+    text_node(" other = ("),
+    rep(1),
+    text_node(") obj;\n    return java.util.Objects.equals("),
+    insert_node(2, "field1"),
+    text_node(", other."),
+    rep(2),
+    text_node(") && java.util.Objects.equals("),
+    insert_node(3, "field2"),
+    text_node(", other."),
+    rep(3),
+    text_node({ ");\n}\n\n@Override\npublic int hashCode() {\n    return java.util.Objects.hash(" }),
+    rep(2),
+    text_node(", "),
+    rep(3),
+    text_node({ ");\n}" }),
+  }),
+
+  snippet("tostring", {
+    text_node("@Override\npublic String toString() {\n    return "),
+    insert_node(1, '"ClassName{" + "field=" + field + "}"'),
+    text_node({ ";\n}" }),
+  }),
+
+  snippet("switchExpr", {
+    text_node("var result = switch ("),
+    insert_node(1, "variable"),
+    text_node({ ") {", "    case " }),
+    insert_node(2, "VALUE1"),
+    text_node(", "),
+    insert_node(3, "VALUE2"),
+    text_node({ " -> {\n        " }),
+    insert_node(4, "// statements"),
+    text_node({ "\n        yield " }),
+    insert_node(5, "value"),
+    text_node({ ";", "    }", "    default -> {\n        " }),
+    insert_node(6, "// default case"),
+    text_node({ "\n        yield " }),
+    insert_node(7, "defaultValue"),
+    text_node({ ";", "    }", "};" }),
+  }),
+
+  snippet("case", {
+    text_node("case "),
+    insert_node(1, "value"),
+    text_node(" -> "),
+    insert_node(2, "// result"),
+    text_node(";"),
+  }),
+
+  snippet("lambda", {
+    insert_node(1, "item"),
+    text_node(" -> "),
+    insert_node(2, "/* expression */"),
+  }),
+
+  snippet("const", {
+    text_node("public static final "),
+    insert_node(1, "Type"),
+    text_node(" "),
+    insert_node(2, "CONSTANT_NAME"),
+    text_node(" = "),
+    insert_node(3, "value"),
+    text_node(";"),
   }),
 }
+
