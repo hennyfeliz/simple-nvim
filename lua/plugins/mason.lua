@@ -6,26 +6,26 @@ return {
     { "<leader>m", "<cmd>Mason<CR>", desc = "Open Mason" },
   },
   config = function()
-    require("mason").setup({
-      ensure_installed = {
-        -- LSP servers
-        "jdtls",              -- Java Language Server
-        "ts_ls",              -- TypeScript/JavaScript LSP
-        "eslint",             -- ESLint LSP
-        "html",               -- HTML LSP
-        "cssls",              -- CSS LSP
-        "jsonls",             -- JSON LSP
-        "lua_ls",             -- Lua LSP
-        
-        -- Formatters
-        "prettier",           -- JavaScript/TypeScript/HTML/CSS formatter
-        "stylua",             -- Lua formatter
-        "black",              -- Python formatter
-        "clang_format",       -- C/C++ formatter
-        "shfmt",              -- Shell formatter
-        "rustfmt",            -- Rust formatter
-      },
-      automatic_installation = true,
-    })
+    require("mason").setup({})
+
+    -- Instala herramientas críticas para Java (rápido y con prioridad)
+    local registry = require("mason-registry")
+    local ensure = {
+      "jdtls",      -- LSP de Java
+      "checkstyle", -- Linter de Java
+    }
+    local function ensure_installed()
+      for _, name in ipairs(ensure) do
+        local ok, pkg = pcall(registry.get_package, name)
+        if ok and not pkg:is_installed() then
+          pkg:install()
+        end
+      end
+    end
+    if registry.refresh then
+      registry.refresh(ensure_installed)
+    else
+      ensure_installed()
+    end
   end,
 }

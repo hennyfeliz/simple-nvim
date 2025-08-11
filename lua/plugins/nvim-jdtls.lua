@@ -1,6 +1,7 @@
 return {
   "mfussenegger/nvim-jdtls",
   ft = { "java" },
+  priority = 1000,
   config = function()
     -- Define a reusable start function
     local function start_jdtls()
@@ -26,6 +27,10 @@ return {
       local jdtls_path = mason_path .. "/jdtls"
       -- Dynamically resolve the launcher JAR (version changes frequently)
       local launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+      if launcher_jar == nil or launcher_jar == "" then
+        vim.notify("No se encontró el launcher de JDTLS en Mason. Abre :Mason y reinstala jdtls.", vim.log.levels.ERROR)
+        return
+      end
 
       -- Use config_win if available, otherwise fall back to config_linux
       local config_path = jdtls_path .. "/config_win"
@@ -84,21 +89,17 @@ return {
         root_dir = root_dir,
         settings = {
           java = {
-            eclipse = {
-              downloadSources = true,
-            },
+            eclipse = { downloadSources = true },
             configuration = {
-              updateBuildConfiguration = "interactive",
+              updateBuildConfiguration = "automatic",
+              runtimes = {},
             },
-            maven = {
-              downloadSources = true,
-            },
-            format = {
-              enabled = true,
-            },
-            saveActions = {
-              organizeImports = false,
-            },
+            maven = { downloadSources = true },
+            import = { maven = { enabled = true } },
+            autobuild = { enabled = true },
+            errors = { incompleteClasspath = { severity = "warning" } },
+            format = { enabled = true },
+            saveActions = { organizeImports = false },
           },
         },
         init_options = {

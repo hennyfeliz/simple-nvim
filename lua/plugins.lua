@@ -10,6 +10,7 @@ return require("lazy").setup({
   require("plugins.nvim-autopairs"),
   require("plugins.bufferline"),
   require("plugins.conform"),
+  require("plugins.nvim-lint"),
   require("plugins.nvim-web-devicons"),
   require("plugins.nvim-treesitter"),
   require("plugins.nvim-lspconfig"),

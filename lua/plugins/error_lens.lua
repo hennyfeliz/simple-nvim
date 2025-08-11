@@ -2,6 +2,7 @@
 return {
   "chikko80/error-lens.nvim",
   enabled = true,
+  event = { "LspAttach", "BufReadPost" },
   auto_adjust = {
     enable = false,
     fallback_bg_color = nil, -- mandatory if enable true (e.g. #281478)
