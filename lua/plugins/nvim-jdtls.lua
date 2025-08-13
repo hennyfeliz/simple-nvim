@@ -7,6 +7,13 @@ return {
     local function start_jdtls()
       local jdtls = require("jdtls")
       
+      -- Guard: evita iniciar JDTLS en buffers sin ruta real
+      local bufname = vim.api.nvim_buf_get_name(0)
+      if not bufname or bufname == "" then
+        vim.notify("JDTLS: guarda el archivo primero (buffer sin nombre)", vim.log.levels.WARN)
+        return
+      end
+
       -- Locate a Java 21+ executable. Prefer $JAVA_HOME, else rely on PATH, else fallback hard-coded.
       local function detect_java()
         local env_java_home = vim.env.JAVA_HOME and (vim.env.JAVA_HOME .. "/bin/java.exe")
@@ -38,13 +45,17 @@ return {
         config_path = jdtls_path .. "/config_linux"
       end
 
-      -- Determine project root (supports Maven/Gradle/Quarkus)
+      -- Determine project root (supports Maven/Gradle/Quarkus) – no fallback
       local root_dir = jdtls.setup.find_root({ "pom.xml", "mvnw", "gradlew", "build.gradle", "settings.gradle", ".git" })
-        or vim.fn.getcwd()
+      if not root_dir or root_dir == "" then
+        vim.notify("JDTLS: no se encontró raíz del proyecto (pom.xml/gradle/.git). No se inicia.", vim.log.levels.WARN)
+        return
+      end
 
-      -- Workspace directory – one per project
-      local project_name = vim.fn.fnamemodify(root_dir, ":t")
-      local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
+      -- Workspace directory – uno por proyecto (único por ruta absoluta)
+      local root_real = vim.loop.fs_realpath(root_dir) or root_dir
+      local sanitized = root_real:gsub("[^%w%._-]", "_")
+      local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. sanitized
 
       -- Try to locate a Lombok JAR on the local machine (for Quarkus & others)
       local function find_lombok_jar()
@@ -135,6 +146,11 @@ return {
           
           -- Organize imports function
           vim.keymap.set("n", "<leader>jo", function()
+            local name = vim.api.nvim_buf_get_name(0)
+            if not name or name == "" then
+              vim.notify("Guarda el archivo antes de organizar imports", vim.log.levels.WARN)
+              return
+            end
             require('jdtls').organize_imports()
           end, { buffer = bufnr, silent = true, desc = "Organize imports" })
         end,
