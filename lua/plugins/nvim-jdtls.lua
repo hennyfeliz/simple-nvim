@@ -14,7 +14,7 @@ return {
         return
       end
 
-      -- Locate a Java 21+ executable. Prefer $JAVA_HOME, else rely on PATH, else fallback hard-coded.
+      -- Locate a Java 17+/21+ executable. Prefer $JAVA_HOME, else rely on PATH, else fallback hard-coded.
       local function detect_java()
         local env_java_home = vim.env.JAVA_HOME and (vim.env.JAVA_HOME .. "/bin/java.exe")
         if env_java_home and vim.fn.executable(env_java_home) == 1 then
@@ -55,19 +55,27 @@ return {
       -- Workspace directory – uno por proyecto (único por ruta absoluta)
       local root_real = vim.loop.fs_realpath(root_dir) or root_dir
       local sanitized = root_real:gsub("[^%w%._-]", "_")
-      local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. sanitized
-
-      -- Try to locate a Lombok JAR on the local machine (for Quarkus & others)
-      local function find_lombok_jar()
-        local home = vim.fn.expand("~")
-        local pattern = home .. "/.m2/repository/org/projectlombok/lombok/*/lombok-*.jar"
-        local jars = vim.fn.glob(pattern, 1, 1)
-        if #jars > 0 then
-          table.sort(jars)
-          return jars[#jars] -- newest version
+      local base_ws = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. sanitized
+      local workspace_dir = base_ws
+      -- Self-heal: si el último log muestra errores graves, usa un workspace limpio
+      local function has_corruption(log_path)
+        if vim.fn.filereadable(log_path) ~= 1 then return false end
+        local ok, lines = pcall(vim.fn.readfile, log_path)
+        if not ok or not lines then return false end
+        for _, ln in ipairs(lines) do
+          if ln:find("ObjectNotFoundException") or ln:find("osgi.ee=JavaSE") then
+            return true
+          end
         end
+        return false
       end
-      local lombok_jar = find_lombok_jar()
+      local log_path = base_ws .. "/.metadata/.log"
+      if has_corruption(log_path) then
+        workspace_dir = base_ws .. "_clean"
+      end
+
+      -- Lombok es opcional; se omite por defecto (evita fallos en algunos entornos)
+      local lombok_jar = nil
 
       -- Build the command array for jdtls
       local cmd = {
@@ -77,9 +85,7 @@ return {
         "-Declipse.product=org.eclipse.jdt.ls.core.product",
         "-Dlog.level=ALL",
         "-Xmx1g",
-        "--add-modules=ALL-SYSTEM",
-        "--add-opens", "java.base/java.util=ALL-UNNAMED",
-        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+        -- Evitar flags agresivos que causan exit code 13 en ciertos JDKs
       }
 
       -- Inject Lombok if found (fixes missing symbols & completions)
@@ -104,12 +110,16 @@ return {
             configuration = {
               updateBuildConfiguration = "automatic",
               runtimes = {},
+              maven = { downloadSources = true },
             },
             maven = { downloadSources = true },
-            import = { maven = { enabled = true } },
+            import = {
+              maven = { enabled = true },
+              gradle = { enabled = true },
+            },
             autobuild = { enabled = true },
             errors = { incompleteClasspath = { severity = "warning" } },
-            format = { enabled = true },
+            format = { enabled = false },
             saveActions = { organizeImports = false },
           },
         },
@@ -139,9 +149,14 @@ return {
           vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
           vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
           
-          -- Format function
+          -- Format function (usa conform + google-java-format)
           vim.keymap.set("n", "<leader>fm", function()
-            vim.lsp.buf.format({ async = true })
+            local ok, conform = pcall(require, "conform")
+            if ok then
+              conform.format({ lsp_fallback = false, async = true })
+            else
+              vim.lsp.buf.format({ async = true })
+            end
           end, { buffer = bufnr, silent = true, desc = "Format Java code" })
           
           -- Organize imports function

@@ -4,7 +4,7 @@ return {
   event = { "BufWritePre" },
   config = function()
     require("conform").setup({
-      -- Disable format_on_save to give manual control
+      -- Sin autoformato en guardado
       format_on_save = false,
       formatters_by_ft = {
         lua = { "stylua" },
@@ -20,11 +20,33 @@ return {
         cpp = { "clang_format" },
         sh = { "shfmt" },
         go = { "gofmt" },
-        -- Java formatting handled by LSP
-        java = {},
+        -- Java con google-java-format (solo cuando se invoque <leader>fm)
+        java = { "google_java_format" },
         rust = { "rustfmt" },
       },
       formatters = {
+        google_java_format = (function()
+          local function detect_java()
+            local env = vim.env.JAVA_HOME and (vim.env.JAVA_HOME .. (vim.fn.has("win32") == 1 and "\\bin\\java.exe" or "/bin/java"))
+            if env and vim.fn.executable(env) == 1 then return env end
+            local sys = vim.fn.exepath("java")
+            if sys ~= "" then return sys end
+            return "java"
+          end
+          local mason = vim.fn.stdpath("data") .. "/mason/packages/google-java-format"
+          local jar = vim.fn.glob(mason .. "/google-java-format*-all-deps.jar")
+          if jar == nil or jar == "" then
+            -- fallback: buscar cualquier jar
+            jar = vim.fn.glob(mason .. "/*.jar")
+          end
+          return {
+            command = detect_java(),
+            args = function(ctx)
+              return { "-jar", jar, "-" }
+            end,
+            stdin = true,
+          }
+        end)(),
         prettier = {
           prepend_args = { "--tab-width", "2", "--use-tabs", "false" },
         },

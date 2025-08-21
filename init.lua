@@ -82,7 +82,7 @@ vim.opt.nu = true
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
-vim.opt.expandtab = true
+vim.opt.expandtab = true -- default; Java lo sobreescribimos a tabs en on_attach de JDTLS
 
 vim.opt.smartindent = true
 vim.opt.wrap = true

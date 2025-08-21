@@ -38,6 +38,6 @@ return require("lazy").setup({
     -- require("plugins.catppuccin"),
     -- require("plugins.playground"),
     -- require("plugins.mason-lspconfig"),
-    -- require("plugins.nvim-jdtls"),
+    require("plugins.nvim-jdtls"),
     -- require("plugins.markview"),
 })
