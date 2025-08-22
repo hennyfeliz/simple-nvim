@@ -33,11 +33,11 @@ return require("lazy").setup({
     -- require("plugins.toggleterm"),
     -- require("plugins.dadbod"),
     -- require("plugins.goose"),
-    -- require("plugins.nvim-dap"),
+    require("plugins.nvim-dap"),
     -- require("plugins.error_lens"),
     -- require("plugins.catppuccin"),
     -- require("plugins.playground"),
     -- require("plugins.mason-lspconfig"),
-    require("plugins.nvim-jdtls"),
+    require("plugins.nvim-java"),
     -- require("plugins.markview"),
 })
