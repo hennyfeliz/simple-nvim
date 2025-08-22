@@ -77,7 +77,11 @@ end, { desc = "Format file or range" })
 
 -- FORMAT CODE KEYBINDS - Works for all file types
 map({ "n", "v" }, "<leader>fm", function()
-  require("conform").format({ async = true, lsp_fallback = true })
+  if vim.bo.filetype == "java" then
+    vim.lsp.buf.format({ async = true })
+  else
+    require("conform").format({ async = true, lsp_fallback = true })
+  end
 end, { desc = "Format code" })
 
 -- ORGANIZE IMPORTS - Separate from formatting
