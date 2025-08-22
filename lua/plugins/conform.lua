@@ -20,8 +20,8 @@ return {
         cpp = { "clang_format" },
         sh = { "shfmt" },
         go = { "gofmt" },
-        -- Java con google-java-format (solo cuando se invoque <leader>fm)
-        java = { "google_java_format" },
+        -- Java: formateo a cargo de JDTLS (LSP)
+        java = {},
         rust = { "rustfmt" },
       },
       formatters = {
