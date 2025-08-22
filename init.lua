@@ -110,3 +110,25 @@ end
 -- vim.o.number = true
 -- vim.keymap.set("n", "<Space>", "", { noremap = true })
 -- ...
+
+-- Diagnósticos: asegurar que estén visibles incluso sin nvim-lspconfig
+vim.diagnostic.config({
+  virtual_text = true,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+})
+
+-- Comando auxiliar para listar clientes LSP adjuntos
+vim.api.nvim_create_user_command("LspClients", function()
+  local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+  local rows = {}
+  for _, c in ipairs(clients) do
+    table.insert(rows, string.format("%s  (root: %s)", c.name, c.config and c.config.root_dir or ""))
+  end
+  if #rows == 0 then
+    print("No LSP clients attached")
+  else
+    print(table.concat(rows, "\n"))
+  end
+end, { desc = "Lista clientes LSP del buffer actual" })
