@@ -1,6 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
-  enabled = false, -- DISABLED - causing crashes
+  enabled = true,
   dependencies = {
     "stevearc/conform.nvim",
     "williamboman/mason.nvim",
@@ -44,7 +44,7 @@ return {
     -- Mason setup
     require("mason").setup()
     require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls" }, -- Only essential servers for now
+      ensure_installed = { "lua_ls", "html", "cssls", "jsonls" },
     })
 
     -- Lua LSP setup
@@ -65,7 +65,7 @@ return {
 
     -- Mason setup for other servers
     require("mason-lspconfig").setup({
-      ensure_installed = { "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "typescript-language-server", "jdtls" },
+      ensure_installed = { "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "typescript-language-server" },
       handlers = {
         function(server_name)
           require("lspconfig")[server_name].setup({ capabilities = capabilities })
@@ -107,9 +107,7 @@ return {
           vim.g.zig_fmt_autosave = 0
         end,
 
-        ["jdtls"] = function()
-          -- Skip jdtls here - handled by nvim-jdtls plugin
-        end,
+        ["jdtls"] = function() end, -- gestionado por nvim-java
 
         ["typescript-language-server"] = function()
           -- TypeScript/JavaScript Language Server configuration  
@@ -146,21 +144,11 @@ return {
 
     -- TypeScript is now handled in the ts_ls handler above
 
-    -- LSP keymaps and autocmds
+    -- LSP keymaps (sin format on save)
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(args)
         local c = vim.lsp.get_client_by_id(args.data.client_id)
         if not c then return end
-
-        -- Format on save for supported clients
-        if c.supports_method("textDocument/formatting") then
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            buffer = args.buf,
-            callback = function()
-              vim.lsp.buf.format({ bufnr = args.buf, id = c.id })
-            end,
-          })
-        end
 
         -- LSP keymaps
         local opts = { buffer = args.buf, silent = true }
