@@ -46,7 +46,75 @@ return {
             return nil
         end
 
-        -- 3) Keymaps cómodos para depurar con Java
+        -- Ajustes recomendados para que JDTLS reimporte Maven y resuelva dependencias externas
+        local jdk21 = detect_jdk21()
+        local jdt_settings = {
+            java = {
+                configuration = {
+                    updateBuildConfiguration = "automatic",
+                    runtimes = (function()
+                        if jdk21 then
+                            return {
+                                { name = "JavaSE-21", path = jdk21, default = true },
+                            }
+                        end
+                        return nil
+                    end)(),
+                },
+                maven = {
+                    downloadSources = true,
+                },
+                imports = {
+                    gradle = { enabled = false },
+                    maven = { enabled = true },
+                },
+                compile = {
+                    nullAnalysis = { enabled = true },
+                },
+                contentProvider = { preferred = "fernflower" },
+            },
+        }
+
+        -- 2) Registrar JDTLS en lspconfig DESPUÉS de java.setup() con root y settings explícitos
+        local function detect_root(fname)
+            local path = fname or vim.api.nvim_buf_get_name(0)
+            return vim.fs.root(path, { "pom.xml", "mvnw", ".git" }) or vim.loop.cwd()
+        end
+
+        require("lspconfig").jdtls.setup({
+            root_dir = function(fname) return detect_root(fname) end,
+            settings = jdt_settings,
+            on_attach = function(client, bufnr)
+                -- Habilitar diagnósticos
+                vim.diagnostic.enable(bufnr)
+            end,
+        })
+
+        -- 3) Comandos para refrescar/limpiar el workspace manualmente cuando Maven cambie
+        vim.api.nvim_create_user_command("JavaRefresh", function()
+            -- Enviar comandos sólo al cliente JDTLS (evita errores en SonarLint)
+            local jdt = nil
+            for _, c in ipairs(vim.lsp.get_active_clients({ bufnr = 0 })) do
+                if c.name == 'jdtls' then jdt = c break end
+            end
+            if jdt then
+                local function jexec(cmd, args)
+                    jdt.request('workspace/executeCommand', { command = cmd, arguments = args or {} }, function() end)
+                end
+                pcall(jexec, 'java.projectConfiguration.update')
+                pcall(jexec, 'java.project.import')
+                vim.notify('Java: proyecto actualizado (JDTLS)', vim.log.levels.INFO)
+            else
+                vim.notify('Java: JDTLS no está activo en este buffer', vim.log.levels.WARN)
+            end
+        end, { desc = "Refresca import/configuración del proyecto Java (JDTLS)" })
+
+        vim.api.nvim_create_user_command("JavaCleanWorkspace", function()
+            pcall(vim.lsp.buf.execute_command, { command = "java.clean.workspace" })
+            vim.notify("Java: solicitado clean del workspace (reinicia JDTLS si es necesario)", vim.log.levels.WARN)
+        end, { desc = "Limpia el workspace de JDTLS" })
+
+        -- 4) Keymaps cómodos para depurar con Java
         local opts = { silent = true, noremap = true }
         vim.keymap.set("n", "<leader>dd", function()
             require("dap").continue()
@@ -63,5 +131,13 @@ return {
         vim.keymap.set("n", "<leader>da", function()
             require("java").debug.attach({ host = "127.0.0.1", port = 5005 })
         end, vim.tbl_extend("force", opts, { desc = "Java: Attach (localhost:5005)" }))
+
+        -- 5) Auto-refresh cuando cambie el pom.xml
+        vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+            pattern = { "pom.xml" },
+            callback = function()
+                pcall(vim.cmd, "JavaRefresh")
+            end,
+        })
     end,
 }
