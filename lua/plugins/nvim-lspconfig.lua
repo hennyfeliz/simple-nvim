@@ -142,8 +142,6 @@ return {
       },
     })
 
-    -- TypeScript is now handled in the ts_ls handler above
-
     -- LSP keymaps (sin format on save)
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(args)
@@ -153,7 +151,15 @@ return {
         -- LSP keymaps
         local opts = { buffer = args.buf, silent = true }
         vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover" }))
-        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Action" }))
+        vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Action" }))
+        vim.keymap.set({ "n", "v" }, "<leader>cj", function()
+          local ok, actions = pcall(require, 'java.actions')
+          if ok and vim.bo[args.buf].filetype == 'java' then
+            actions.menu()
+          else
+            vim.notify('Java generators not available here', vim.log.levels.WARN)
+          end
+        end, vim.tbl_extend("force", opts, { desc = "Java Generators (local)" }))
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
       end,
     })
