@@ -20,8 +20,8 @@ return {
         cpp = { "clang_format" },
         sh = { "shfmt" },
         go = { "gofmt" },
-        -- Java: formateo a cargo de JDTLS (LSP)
-        java = {},
+        -- Java: usar google-java-format (evita errores de JDTLS al formatear)
+        java = { "google_java_format" },
         rust = { "rustfmt" },
       },
       formatters = {
@@ -42,7 +42,8 @@ return {
           return {
             command = detect_java(),
             args = function(ctx)
-              return { "-jar", jar, "-" }
+              -- --aosp = indentación de 4 espacios
+              return { "-jar", jar, "--aosp", "-" }
             end,
             stdin = true,
           }
