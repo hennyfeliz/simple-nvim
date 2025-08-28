@@ -20,6 +20,7 @@ return {
     local ensure = {
       -- Ya no forzamos jdtls aquí; nvim-java lo gestiona
       "sonarlint-language-server",  -- Linter SonarLint (LSP)
+      "google-java-format",         -- Formateador Java
     }
     local function ensure_installed()
       for _, name in ipairs(ensure) do
