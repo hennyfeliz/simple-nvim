@@ -77,11 +77,7 @@ end, { desc = "Format file or range" })
 
 -- FORMAT CODE KEYBINDS - Works for all file types
 map({ "n", "v" }, "<leader>fm", function()
-  if vim.bo.filetype == "java" then
-    vim.lsp.buf.format({ async = true })
-  else
-    require("conform").format({ async = true, lsp_fallback = true })
-  end
+  require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Format code" })
 
 -- ORGANIZE IMPORTS - Separate from formatting
@@ -109,7 +105,7 @@ map('n', '<leader>Y', '"+Y', { desc = 'Yank into " register' })
 -- map('n', '<leader>as', 'gg<S-v><S-g><leader>"+y', { desc = 'Yank all into " register' })
 
 -- reeplace everything
-map("n", "<leader>ca", 'gg<S-v><S-g>d"*p', { desc = 'Paste everything in the paper " register' })
+-- map("n", "<leader>ca", 'gg<S-v><S-g>d"*p', { desc = 'Paste everything in the paper " register' })
 
 -- map("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
 -- Duplicate current line in normal mode:
@@ -146,6 +142,7 @@ map("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" }
 map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
 map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
 map("n", "<leader>rs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
+map("n", "<leader>jr", ":JavaRefresh<Enter>", { desc = "Java Refresh" })
 
 -- toggleterm keymaps
 set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })
