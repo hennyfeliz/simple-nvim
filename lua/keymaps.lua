@@ -2,6 +2,14 @@
 local map = vim.keymap.set
 local set_keymap = vim.api.nvim_set_keymap
 
+-- CodeCompanion
+map("n", "<leader>cc", "<cmd>CodeCompanion<cr>", { desc = "Chat" })
+map("v", "<leader>cc", "<cmd>CodeCompanion<cr>", { desc = "Chat sobre selección" })
+map("n", "<leader>cr", "<cmd>CodeCompanionActions<cr>", { desc = "Acciones (inline)" })
+
+-- Avante
+map("n", "<leader>av", "<cmd>Avante<cr>", { desc = "Abrir panel Avante" })
+
 -- Telescope's built-in pickers
 map("n", "<leader>ff", function()
   require("telescope.builtin").find_files()

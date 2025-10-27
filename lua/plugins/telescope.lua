@@ -4,7 +4,7 @@ return {
   dependencies = { "nvim-lua/plenary.nvim" },
   opts = function(_, opts)
     local ivy = require("telescope.themes").get_ivy({
-      layout_config = { height = 0.30, preview_width = 0.7 },
+      layout_config = { height = 0.50, preview_width = 0.5 },
       -- remove titles
       results_title = false,
       preview_title = false,
@@ -49,21 +49,21 @@ return {
       layout_strategy = "bottom_pane",
       sorting_strategy = "ascending",
       layout_config = {
-        height = 0.30,
-        preview_width = 0.7,
+        height = 0.50,
+        preview_width = 0.5,
         preview_cutoff = 1,
       },
-      
+
       -- Configurar preview
       preview = {
         check_mime_type = false,
         filesize_limit = 0.1,
       },
-      
+
       -- Títulos
       results_title = false,
       preview_title = false,
-      
+
       -- Bordes personalizados: solo línea vertical entre resultados y preview
       borderchars = {
         prompt = { " ", " ", " ", " ", " ", " ", " ", " " },
