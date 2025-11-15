@@ -149,6 +149,7 @@ map("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" }
 -- Code Actions and Refactoring
 map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
 map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
+map("n", "<leader>rr", ":%s/", { desc = "Rename Symbols" })
 map("n", "<leader>rs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
 map("n", "<leader>jr", ":JavaRefresh<Enter>", { desc = "Java Refresh" })
 

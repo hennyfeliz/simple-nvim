@@ -23,6 +23,9 @@ return require("lazy").setup({
     require("plugins.vim-surround"),
     require("plugins.symbols-outline"),
     require("plugins.vim-visual-multi"),
+    require("plugins.tiny-line-diagnostic"),
+    require("plugins.tiny-glimmer"),
+    require("plugins.spectre"),
 
     require("plugins.store-nvim"),
     require("plugins.cursor-ai-replacement"),

@@ -11,7 +11,25 @@ end
 -- cursor config
 vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver50,r-cr:hor20,o:hor50"
 
-vim.o.fileformats="unix,dos" -- nueva configuración para evitar las M
+-- EOL: usar LF siempre y detectar CRLF al abrir
+vim.opt.fileformat = "unix"
+vim.opt.fileformats = { "unix", "dos" }
+
+-- Fuerza LF y elimina ^M (carriage return) en lectura/escritura
+local fix_crlf_group = vim.api.nvim_create_augroup("FixCRLF", { clear = true })
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePre" }, {
+  group = fix_crlf_group,
+  pattern = "*",
+  callback = function(args)
+    -- siempre guardar como LF
+    vim.bo[args.buf].fileformat = "unix"
+    -- si hay CR literales (mostrados como ^M), eliminarlos
+    local view = vim.fn.winsaveview()
+    vim.cmd([[%s/\r$//e]])
+    vim.fn.winrestview(view)
+  end,
+  desc = "Forzar finales de línea LF y limpiar ^M",
+})
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
