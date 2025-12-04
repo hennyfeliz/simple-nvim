@@ -308,15 +308,8 @@ require("tiny-glimmer").setup({
 -- Remove deprecated shim functions that are causing warnings
 -- Modern Neovim handles these automatically
 
-local function on_attach(bufnr)
-    local api = require("nvim-tree.api")
-    api.config.mappings.default_on_attach(bufnr)
-    vim.keymap.del("n", "<C-k>", { buffer = bufnr })
-end
-
-require("nvim-tree").setup {
-    on_attach = on_attach,
-}
+-- La configuración de nvim-tree se maneja en lua/plugins/nvim-tree.lua
+-- para evitar conflictos y sobrescrituras
 
 vim.diagnostic.config({
     virtual_text = {

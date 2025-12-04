@@ -3,7 +3,7 @@ return {
   "nvim-tree/nvim-tree.lua",
   opts = {
     view = {
-      width = 30,
+      width = 60,
       side = "left",
     },
   },
@@ -15,17 +15,23 @@ return {
     -- optionally enable 24-bit colour
     vim.opt.termguicolors = true
 
-    -- empty setup using defaults
-    require("nvim-tree").setup()
+    -- Función on_attach personalizada
+    local function on_attach(bufnr)
+      local api = require("nvim-tree.api")
+      api.config.mappings.default_on_attach(bufnr)
+      vim.keymap.del("n", "<C-k>", { buffer = bufnr })
+    end
 
-    -- OR setup with some options
+    -- Setup con todas las opciones
     require("nvim-tree").setup({
+      on_attach = on_attach,
       sort = {
         sorter = "case_sensitive",
       },
       view = {
-        width = 30,
-        adaptive_size = true, -- optional: shrink/expand tree to fit
+        width = 60,
+        adaptive_size = false, -- desactivado para respetar el ancho fijo
+        side = "left",
       },
       renderer = {
         group_empty = true,
