@@ -48,7 +48,7 @@ return {
     })
 
     -- Lua LSP setup
-    require("lspconfig").lua_ls.setup({
+    vim.lsp.config("lua_ls", {
       capabilities = capabilities,
       settings = {
         Lua = {
@@ -62,16 +62,18 @@ return {
         },
       },
     })
+    vim.lsp.enable("lua_ls")
 
     -- Mason setup for other servers
     require("mason-lspconfig").setup({
-      ensure_installed = { "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "typescript-language-server" },
+      ensure_installed = { "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "ts_ls" },
       handlers = {
         function(server_name)
-          require("lspconfig")[server_name].setup({ capabilities = capabilities })
+          vim.lsp.config(server_name, { capabilities = capabilities })
+          vim.lsp.enable(server_name)
         end,
         ["emmet_ls"] = function()
-          require("lspconfig").emmet_ls.setup({
+          vim.lsp.config("emmet_ls", {
             capabilities = capabilities,
             filetypes = {
               "html",
@@ -89,12 +91,14 @@ return {
               },
             },
           })
+          vim.lsp.enable("emmet_ls")
         end,
 
         ["zls"] = function()
-          local lspconfig = require("lspconfig")
-          lspconfig.zls.setup({
-            root_dir = lspconfig.util.root_pattern(".git", "build.zig", "zls.json"),
+          vim.lsp.config("zls", {
+            root_dir = function(bufnr, on_dir)
+              on_dir(vim.fs.root(vim.api.nvim_buf_get_name(bufnr), { ".git", "build.zig", "zls.json" }))
+            end,
             settings = {
               zls = {
                 enable_inlay_hints = true,
@@ -103,41 +107,42 @@ return {
               },
             },
           })
+          vim.lsp.enable("zls")
           vim.g.zig_fmt_parse_errors = 0
           vim.g.zig_fmt_autosave = 0
         end,
 
         ["jdtls"] = function() end, -- gestionado por nvim-java
 
-        ["typescript-language-server"] = function()
-          -- TypeScript/JavaScript Language Server configuration  
-          require("lspconfig").tsserver.setup({
+        ["ts_ls"] = function()
+          vim.lsp.config("ts_ls", {
             capabilities = capabilities,
             settings = {
               typescript = {
                 inlayHints = {
-                  includeInlayParameterNameHints = 'all',
+                  includeInlayParameterNameHints = "all",
                   includeInlayParameterNameHintsWhenArgumentMatchesName = false,
                   includeInlayFunctionParameterTypeHints = true,
                   includeInlayVariableTypeHints = true,
                   includeInlayPropertyDeclarationTypeHints = true,
                   includeInlayFunctionLikeReturnTypeHints = true,
                   includeInlayEnumMemberValueHints = true,
-                }
+                },
               },
               javascript = {
                 inlayHints = {
-                  includeInlayParameterNameHints = 'all',
+                  includeInlayParameterNameHints = "all",
                   includeInlayParameterNameHintsWhenArgumentMatchesName = false,
                   includeInlayFunctionParameterTypeHints = true,
                   includeInlayVariableTypeHints = true,
                   includeInlayPropertyDeclarationTypeHints = true,
                   includeInlayFunctionLikeReturnTypeHints = true,
                   includeInlayEnumMemberValueHints = true,
-                }
-              }
-            }
+                },
+              },
+            },
           })
+          vim.lsp.enable("ts_ls")
         end,
       },
     })

@@ -62,7 +62,7 @@ map("n", "<S-l>", "<Cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<C-i>", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
 
 -- selection keybindings
-map("n", "<leader>aa", "gg<S-v><S-g>", { desc = "Select all" })
+-- map("n", "<leader>aa", "gg<S-v><S-g>", { desc = "Select all" })
 map("n", "<leader>ar",
   "gg<S-v><S-g>:s/",
   { desc = "Select & search all" }

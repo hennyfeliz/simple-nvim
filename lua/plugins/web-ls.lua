@@ -5,7 +5,7 @@ return {
   dependencies = { "williamboman/mason-lspconfig.nvim" },
   opts = {
     servers = {
-      tsserver = {
+      ts_ls = {
         settings = {
           typescript = {
             inlayHints = {
@@ -27,9 +27,9 @@ return {
     },
   },
   config = function(_, opts)
-    local lsp = require("lspconfig")
     for name, cfg in pairs(opts.servers or {}) do
-      lsp[name].setup(cfg)
+      vim.lsp.config(name, cfg)
+      vim.lsp.enable(name)
     end
   end,
 }

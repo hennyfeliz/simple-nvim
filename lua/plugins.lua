@@ -28,6 +28,7 @@ return require("lazy").setup({
     require("plugins.spectre"),
 
     require("plugins.store-nvim"),
+    require("plugins.opencode"),
     require("plugins.cursor-ai-replacement"),
 
 
@@ -41,7 +42,7 @@ return require("lazy").setup({
     -- require("plugins.goose"),
     require("plugins.nvim-dap"),
     -- require("plugins.error_lens"),
-    -- require("plugins.catppuccin"),
+    require("plugins.catppuccin"),
     -- require("plugins.playground"),
     -- require("plugins.mason-lspconfig"),
     require("plugins.nvim-java"),

@@ -2,7 +2,7 @@
 -- Nota: No se debe usar junto a mfussenegger/nvim-jdtls (plugin).
 -- Este archivo declara el plugin y realiza la configuración mínima recomendada:
 -- 1) require('java').setup() primero
--- 2) luego lspconfig.jdtls.setup({})
+-- 2) luego vim.lsp.config('jdtls', {}) y vim.lsp.enable('jdtls')
 return {
     "nvim-java/nvim-java",
     ft = { "java" },
@@ -75,20 +75,22 @@ return {
             },
         }
 
-        -- 2) Registrar JDTLS en lspconfig DESPUÉS de java.setup() con root y settings explícitos
+        -- 2) Registrar JDTLS con vim.lsp.config DESPUÉS de java.setup() con root y settings explícitos
         local function detect_root(fname)
             local path = fname or vim.api.nvim_buf_get_name(0)
             return vim.fs.root(path, { "pom.xml", "mvnw", ".git" }) or vim.loop.cwd()
         end
 
-        require("lspconfig").jdtls.setup({
-            root_dir = function(fname) return detect_root(fname) end,
+        vim.lsp.config("jdtls", {
+            root_dir = function(bufnr, on_dir)
+                on_dir(detect_root(vim.api.nvim_buf_get_name(bufnr)))
+            end,
             settings = jdt_settings,
             on_attach = function(client, bufnr)
-                -- Habilitar diagnósticos
                 vim.diagnostic.enable(bufnr)
             end,
         })
+        vim.lsp.enable("jdtls")
 
         -- 3) Comandos para refrescar/limpiar el workspace manualmente cuando Maven cambie
         vim.api.nvim_create_user_command("JavaRefresh", function()
