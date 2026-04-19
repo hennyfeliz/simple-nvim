@@ -21,6 +21,8 @@ return {
       -- Ya no forzamos jdtls aquí; nvim-java lo gestiona
       "sonarlint-language-server",  -- Linter SonarLint (LSP)
       "google-java-format",         -- Formateador Java
+      "java-debug-adapter",         -- DAP Java (launch/attach)
+      "java-test",                  -- Soporte debug/run de tests Java
     }
     local function ensure_installed()
       for _, name in ipairs(ensure) do
@@ -70,7 +72,7 @@ return {
       pattern = { "java" },
       callback = function(args)
         local root = detect_root(vim.api.nvim_buf_get_name(args.buf))
-        local existing = vim.lsp.get_active_clients({ name = "sonarlint", root_dir = root })
+        local existing = vim.lsp.get_clients({ name = "sonarlint", bufnr = args.buf })
         if existing and #existing > 0 then return end
         vim.lsp.start({
           name = "sonarlint",
@@ -78,7 +80,7 @@ return {
           root_dir = root,
           filetypes = { "java" },
           on_attach = function(_, bufnr)
-            vim.diagnostic.enable(bufnr)
+            vim.diagnostic.enable(true, { bufnr = bufnr })
           end,
           settings = { sonarlint = { telemetry = { enabled = false } } },
         })

@@ -8,6 +8,11 @@ if vim.lsp._request_name_to_capability == nil then
   })
 end
 
+-- Compat shim: plugins viejos aún llaman get_active_clients (deprecado en 0.11)
+if vim.lsp.get_clients and vim.lsp.get_active_clients then
+  vim.lsp.get_active_clients = vim.lsp.get_clients
+end
+
 -- Modo limpio ("versión limpia"): sin LSP, lint ni format. Activa con:
 --   NVIM_CLEAN=1 nvim   (cmd: set NVIM_CLEAN=1 && nvim)
 --   PowerShell: $env:NVIM_CLEAN='1'; nvim
@@ -150,7 +155,7 @@ end
 
 -- Comando auxiliar para listar clientes LSP adjuntos
 vim.api.nvim_create_user_command("LspClients", function()
-  local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
   local rows = {}
   for _, c in ipairs(clients) do
     table.insert(rows, string.format("%s  (root: %s)", c.name, c.config and c.config.root_dir or ""))
