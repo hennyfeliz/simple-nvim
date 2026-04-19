@@ -1,6 +1,7 @@
 -- ~/.config/nvim/lua/keymaps.lua
 local map = vim.keymap.set
 local set_keymap = vim.api.nvim_set_keymap
+local clean = vim.g.nvim_clean
 
 -- CodeCompanion
 map("n", "<leader>cc", "<cmd>CodeCompanion<cr>", { desc = "Chat" })
@@ -62,11 +63,11 @@ map("n", "<S-l>", "<Cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<C-i>", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
 
 -- selection keybindings
--- map("n", "<leader>aa", "gg<S-v><S-g>", { desc = "Select all" })
-map("n", "<leader>ar",
-  "gg<S-v><S-g>:s/",
-  { desc = "Select & search all" }
-)
+map("n", "<leader>aa", "gg<S-v><S-g>", { desc = "Select all" })
+-- map("n", "<leader>ar",
+--   "gg<S-v><S-g>:s/",
+--   { desc = "Select & search all" }
+-- )
 map("v", "<leader>r",
   ":s/",
   { desc = "Substitute in visual selection" }
@@ -78,32 +79,31 @@ map("n", "<C-k>", "<C-w>k", { noremap = true })
 map("n", "<C-h>", "<C-w>h", { noremap = true })
 map("n", "<C-l>", "<C-w>l", { noremap = true })
 
--- format code
-map({ "n", "v" }, "<leader>f", function()
-  require("conform").format({ async = true, lsp_fallback = true })
-end, { desc = "Format file or range" })
+if not clean then
+  -- format code
+  map({ "n", "v" }, "<leader>f", function()
+    require("conform").format({ async = true, lsp_fallback = true })
+  end, { desc = "Format file or range" })
 
--- FORMAT CODE KEYBINDS - Works for all file types
-map({ "n", "v" }, "<leader>fm", function()
-  require("conform").format({ async = true, lsp_fallback = true })
-end, { desc = "Format code" })
+  -- FORMAT CODE KEYBINDS - Works for all file types
+  map({ "n", "v" }, "<leader>fm", function()
+    require("conform").format({ async = true, lsp_fallback = true })
+  end, { desc = "Format code" })
 
--- ORGANIZE IMPORTS - Separate from formatting
-map("n", "<leader>jo", function()
-  vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } } })
-end, { desc = "Organize imports" })
+  -- ORGANIZE IMPORTS - Separate from formatting
+  map("n", "<leader>jo", function()
+    vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } } })
+  end, { desc = "Organize imports" })
 
---
--- LSP CONFIG KEYBINDS
--- Go to next/prev diagnostic
-map("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
-map("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
+  --
+  -- LSP CONFIG KEYBINDS
+  -- Go to next/prev diagnostic
+  map("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
+  map("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
 
--- Open floating diagnostic
--- map("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
-
--- List all diagnostics with Telescope
-map("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "List Diagnostics" })
+  -- List all diagnostics with Telescope
+  map("n", "<leader>ld", "<cmd>Telescope diagnostics<CR>", { desc = "List Diagnostics" })
+end
 
 -- Copy text to " register
 map('n', '<leader>y', '"+y', { desc = 'Yank into " register' })
@@ -139,19 +139,22 @@ map("v", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
 -- -- wrap word in single-quotes with <leader>'
 -- map('n', "<leader>'", "viw<esc>a'<esc>bi'<esc>", { noremap = true, silent = true })
 
--- LSP Nav keymaps
-map("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
-map("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs" })
-map("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
-map("n", "<leader>gr", vim.lsp.buf.references, { desc = "List References" })
-map("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" })
+if not clean then
+  -- LSP Nav keymaps
+  map("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+  map("n", "K", vim.lsp.buf.hover, { desc = "Hover Docs" })
+  map("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
+  map("n", "<leader>gr", vim.lsp.buf.references, { desc = "List References" })
+  map("n", "<leader>gt", vim.lsp.buf.type_definition, { desc = "Type Definition" })
 
--- Code Actions and Refactoring
-map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
-map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
+  -- Code Actions and Refactoring
+  map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
+  map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
+  map("n", "<leader>rs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
+  map("n", "<leader>jr", ":JavaRefresh<Enter>", { desc = "Java Refresh" })
+end
+
 map("n", "<leader>rr", ":%s/", { desc = "Rename Symbols" })
-map("n", "<leader>rs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
-map("n", "<leader>jr", ":JavaRefresh<Enter>", { desc = "Java Refresh" })
 
 -- toggleterm keymaps
 set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })

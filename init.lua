@@ -8,6 +8,21 @@ if vim.lsp._request_name_to_capability == nil then
   })
 end
 
+-- Modo limpio ("versión limpia"): sin LSP, lint ni format. Activa con:
+--   NVIM_CLEAN=1 nvim   (cmd: set NVIM_CLEAN=1 && nvim)
+--   PowerShell: $env:NVIM_CLEAN='1'; nvim
+--   nvim --cmd "lua vim.g.nvim_clean = true"
+-- Nota: -o en Neovim ya significa ventanas en horizontal; usa nvim-clean.cmd o la variable.
+vim.g.nvim_clean = (vim.env.NVIM_CLEAN == "1") or (vim.g.nvim_clean == true)
+if vim.g.nvim_clean then
+  vim.diagnostic.config({
+    virtual_text = false,
+    signs = false,
+    underline = false,
+    update_in_insert = false,
+  })
+end
+
 -- cursor config
 vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver50,r-cr:hor20,o:hor50"
 
@@ -131,13 +146,7 @@ end
 -- vim.keymap.set("n", "<Space>", "", { noremap = true })
 -- ...
 
--- Diagnósticos: asegurar que estén visibles incluso sin nvim-lspconfig
-vim.diagnostic.config({
-  virtual_text = true,
-  signs = true,
-  underline = true,
-  update_in_insert = false,
-})
+-- Diagnósticos: el modo completo los configura en lua/config/full.lua
 
 -- Comando auxiliar para listar clientes LSP adjuntos
 vim.api.nvim_create_user_command("LspClients", function()
