@@ -33,7 +33,28 @@ return {
       { "<leader>/",       function() Snacks.picker.grep() end,                                    desc = "Grep" },
       { "<leader>:",       function() Snacks.picker.command_history() end,                         desc = "Command History" },
       { "<leader>n",       function() Snacks.picker.notifications() end,                           desc = "Notification History" },
-      { "<leader>e",       function() Snacks.explorer() end,                                       desc = "File Explorer" },
+      {
+        "<leader>E",
+        function()
+          local sync = rawget(_G, "__dap_explorer_sync")
+          local explorer_was_open = vim.g.__snacks_explorer_open == 1
+          if explorer_was_open then
+            Snacks.explorer()
+            if sync and sync.reopen_after_explorer then
+              sync.reopen_after_explorer()
+            end
+            vim.g.__snacks_explorer_open = 0
+            return
+          end
+
+          if sync and sync.close_for_explorer then
+            sync.close_for_explorer()
+          end
+          Snacks.explorer()
+          vim.g.__snacks_explorer_open = 1
+        end,
+        desc = "Snacks: File Explorer",
+      },
       -- find
       { "<leader>fb",      function() Snacks.picker.buffers() end,                                 desc = "Buffers" },
       { "<leader>fc",      function() Snacks.picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Find Config File" },

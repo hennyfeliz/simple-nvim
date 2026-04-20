@@ -22,6 +22,20 @@ return {
       vim.keymap.del("n", "<C-k>", { buffer = bufnr })
     end
 
+    local function dap_sync_close_for_explorer()
+      local sync = rawget(_G, "__dap_explorer_sync")
+      if sync and sync.close_for_explorer then
+        sync.close_for_explorer()
+      end
+    end
+
+    local function dap_sync_reopen_after_explorer()
+      local sync = rawget(_G, "__dap_explorer_sync")
+      if sync and sync.reopen_after_explorer then
+        sync.reopen_after_explorer()
+      end
+    end
+
     -- Setup con todas las opciones
     require("nvim-tree").setup({
       on_attach = on_attach,
@@ -45,7 +59,18 @@ return {
         ignore_list = {},   -- files/dirs to skip, if any
       },
     })
-    vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
+
+    local ok_api, api = pcall(require, "nvim-tree.api")
+    if ok_api and api.events and api.events.subscribe then
+      api.events.subscribe(api.events.Event.TreeOpen, function()
+        dap_sync_close_for_explorer()
+      end)
+      api.events.subscribe(api.events.Event.TreeClose, function()
+        dap_sync_reopen_after_explorer()
+      end)
+    end
+
+    vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true, desc = "NvimTree: Toggle" })
     vim.keymap.set("n", "<leader>je", ":NvimTreeFindFile<CR>", { silent = true })
     --set a keybind to exit nvim tree when enter a file and with C-enters "<C-<CR>> i think..." it opens the file, but keeps nvim tree open
     -- vim.keymap.set("n", "<C-CR>", ":NvimTreeClose<CR>", { noremap = true, silent = true })

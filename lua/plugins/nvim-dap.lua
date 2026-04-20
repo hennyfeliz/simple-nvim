@@ -152,6 +152,11 @@ return {
             {
                 "<leader>du",
                 function()
+                    local sync = rawget(_G, "__dap_explorer_sync")
+                    if sync and sync.toggle_dapui then
+                        sync.toggle_dapui()
+                        return
+                    end
                     require("dapui").toggle()
                 end,
                 desc = "DAP: Toggle UI",
@@ -160,17 +165,97 @@ return {
         },
         config = function()
             local dap, dapui = require("dap"), require("dapui")
+            local sync_state = {
+                dapui_open = false,
+                reopen_after_explorer = false,
+            }
 
-            dapui.setup()
+            local function has_active_dap_session()
+                return dap.session() ~= nil
+            end
+
+            local function open_dapui()
+                if sync_state.dapui_open then
+                    return
+                end
+                dapui.open()
+                sync_state.dapui_open = true
+            end
+
+            local function close_dapui(opts)
+                local remember_for_explorer = opts and opts.remember_for_explorer
+                if remember_for_explorer and has_active_dap_session() then
+                    sync_state.reopen_after_explorer = true
+                end
+                if not sync_state.dapui_open then
+                    return
+                end
+                dapui.close()
+                sync_state.dapui_open = false
+            end
+
+            local function reopen_dapui_after_explorer()
+                if sync_state.reopen_after_explorer and has_active_dap_session() then
+                    open_dapui()
+                end
+                sync_state.reopen_after_explorer = false
+            end
+
+            dapui.setup({
+                layouts = {
+                    {
+                        elements = {
+                            { id = "scopes", size = 0.5 },
+                            { id = "breakpoints", size = 0.2 },
+                            { id = "stacks", size = 0.2 },
+                            { id = "watches", size = 0.1 },
+                        },
+                        size = 0.4,
+                        position = "left",
+                    },
+                    {
+                        elements = {
+                            { id = "repl", size = 0.5 },
+                            { id = "console", size = 0.5 },
+                        },
+                        size = 0.4,
+                        position = "bottom",
+                    },
+                },
+            })
+
+            _G.__dap_explorer_sync = {
+                close_for_explorer = function()
+                    close_dapui({ remember_for_explorer = true })
+                end,
+                reopen_after_explorer = reopen_dapui_after_explorer,
+                toggle_dapui = function()
+                    if sync_state.dapui_open then
+                        close_dapui({ remember_for_explorer = false })
+                    else
+                        open_dapui()
+                    end
+                end,
+                is_dapui_open = function()
+                    return sync_state.dapui_open
+                end,
+            }
 
             dap.listeners.after.event_initialized["dapui_config"] = function()
-                dapui.open()
+                sync_state.reopen_after_explorer = false
+                open_dapui()
             end
             dap.listeners.before.event_terminated["dapui_config"] = function()
-                dapui.close()
+                sync_state.reopen_after_explorer = false
+                close_dapui({ remember_for_explorer = false })
             end
             dap.listeners.before.event_exited["dapui_config"] = function()
-                dapui.close()
+                sync_state.reopen_after_explorer = false
+                close_dapui({ remember_for_explorer = false })
+            end
+            dap.listeners.before.disconnect["dapui_config"] = function()
+                sync_state.reopen_after_explorer = false
+                close_dapui({ remember_for_explorer = false })
             end
 
             -- el mapeo ya se declara arriba en `keys` para que funcione al primer golpe
