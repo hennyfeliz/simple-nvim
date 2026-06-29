@@ -109,6 +109,13 @@ return {
                 desc = "DAP: Restart Session"
             },
 
+            {
+                "<leader>ja",
+                function() require("dap_attach_menu").pick() end,
+                desc = "DAP: Attach Java (Quarkus/WebLogic/Manual)",
+                mode = "n",
+            },
+
         },
 
         config = function()
@@ -132,6 +139,92 @@ return {
                     { text = icon, texthl = "DiagnosticInfo", linehl = "", numhl = "" }
                 )
             end
+
+            -- Java attach adapter. Self-contained TCP connector so the picker
+            -- works even if nvim-java is not loaded (and doesn't collide with
+            -- the `java` adapter registered by nvim-java).
+            dap.adapters.javaAttach = function(callback, config)
+                callback({
+                    type = "server",
+                    host = config.hostName or "127.0.0.1",
+                    port = tonumber(config.port),
+                })
+            end
+
+            local function run_attach(label, host, port)
+                dap.run({
+                    type = "javaAttach",
+                    request = "attach",
+                    name = string.format("Attach: %s (%s:%d)", label, host, port),
+                    hostName = host,
+                    port = port,
+                })
+            end
+
+            local function prompt_manual()
+                vim.ui.input({ prompt = "Host: ", default = "127.0.0.1" }, function(host)
+                    if not host or host == "" then
+                        vim.notify("DAP attach cancelado", vim.log.levels.INFO)
+                        return
+                    end
+                    vim.ui.input({ prompt = "Port: ", default = "8787" }, function(port_str)
+                        if not port_str or port_str == "" then
+                            vim.notify("DAP attach cancelado", vim.log.levels.INFO)
+                            return
+                        end
+                        local port = tonumber(port_str)
+                        if not port or port < 1 or port > 65535 then
+                            vim.notify(
+                                "Puerto invalido: " .. tostring(port_str),
+                                vim.log.levels.ERROR
+                            )
+                            return
+                        end
+                        run_attach("Manual", host, port)
+                    end)
+                end)
+            end
+
+            local presets = {
+                { label = "Quarkus",    host = "127.0.0.1", port = 5005 },
+                { label = "WebLogic",   host = "127.0.0.1", port = 8787 },
+                { label = "Manual..." },
+            }
+
+            local menu = {
+                pick = function()
+                    local items = {}
+                    for _, p in ipairs(presets) do
+                        if p.port then
+                            table.insert(
+                                items,
+                                string.format("%s (%s:%d)", p.label, p.host, p.port)
+                            )
+                        else
+                            table.insert(items, p.label)
+                        end
+                    end
+
+                    vim.ui.select(items, { prompt = "Attach Java to:" }, function(_, idx)
+                        if not idx then
+                            vim.notify("DAP attach cancelado", vim.log.levels.INFO)
+                            return
+                        end
+                        local p = presets[idx]
+                        if p.port then
+                            run_attach(p.label, p.host, p.port)
+                        else
+                            prompt_manual()
+                        end
+                    end)
+                end,
+            }
+
+            package.loaded["dap_attach_menu"] = menu
+
+            vim.api.nvim_create_user_command("DapAttachJava", function()
+                menu.pick()
+            end, { desc = "DAP: Attach Java (Quarkus/WebLogic/Manual)" })
 
             -- setup dap config by VsCode launch.json file (optional)
             local vscode = require("dap.ext.vscode")
