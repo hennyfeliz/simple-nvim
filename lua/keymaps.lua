@@ -3,6 +3,39 @@ local map = vim.keymap.set
 local set_keymap = vim.api.nvim_set_keymap
 local clean = vim.g.nvim_clean
 
+local function get_last_visual_selection()
+  local start_pos = vim.api.nvim_buf_get_mark(0, "<")
+  local end_pos = vim.api.nvim_buf_get_mark(0, ">")
+  local srow, scol = start_pos[1], start_pos[2]
+  local erow, ecol = end_pos[1], end_pos[2]
+
+  if srow == 0 or erow == 0 then
+    return nil
+  end
+
+  if srow > erow or (srow == erow and scol > ecol) then
+    srow, erow = erow, srow
+    scol, ecol = ecol, scol
+  end
+
+  local lines = vim.api.nvim_buf_get_text(0, srow - 1, scol, erow - 1, ecol + 1, {})
+  if not lines or #lines == 0 then
+    return nil
+  end
+
+  local text = table.concat(lines, "\n")
+  if text == "" then
+    return nil
+  end
+
+  return text
+end
+
+local function escape_for_substitute(text)
+  local escaped = text:gsub("\\", "\\\\"):gsub("/", "\\/"):gsub("\n", "\\n")
+  return "\\V" .. escaped
+end
+
 -- CodeCompanion
 map("n", "<leader>cc", "<cmd>CodeCompanion<cr>", { desc = "Chat" })
 map("v", "<leader>cc", "<cmd>CodeCompanion<cr>", { desc = "Chat sobre selección" })
@@ -61,6 +94,9 @@ map("n", "ss", "<S-a><CR><esc>")
 map("n", "<S-h>", "<Cmd>BufferLineCyclePrev<CR>", { desc = "Prev buffer" })
 map("n", "<S-l>", "<Cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<C-i>", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
+map("n", "<C-A-i>", function()
+  Snacks.bufdelete.all()
+end, { desc = "Delete all buffers" })
 
 -- selection keybindings
 map("n", "<leader>aa", "gg<S-v><S-g>", { desc = "Select all" })
@@ -122,10 +158,10 @@ map("n", "<C-d>", "yyp", { desc = 'Duplicate line', noremap = true })
 map("v", "<C-d>", ":t'><CR>gv",
   { desc = "Duplicate selection (keep selection)", noremap = true, silent = true })
 
-map("n", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
-map("n", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
-map("v", "<C-j>", "10j", { desc = '10 lines down', noremap = true })
-map("v", "<C-k>", "10k", { desc = '10 lines up', noremap = true })
+map("n", "<C-j>", "5j", { desc = '5 lines down', noremap = true })
+map("n", "<C-k>", "5k", { desc = '5 lines up', noremap = true })
+map("v", "<C-j>", "5j", { desc = '5 lines down', noremap = true })
+map("v", "<C-k>", "5k", { desc = '5 lines up', noremap = true })
 
 -- map("n", "<C-h>", "10h", { desc = '10 lines left', noremap = true })
 -- map("n", "<C-l>", "10l", { desc = '10 lines right', noremap = true })
@@ -154,7 +190,56 @@ if not clean then
   map("n", "<leader>jr", ":JavaRefresh<Enter>", { desc = "Java Refresh" })
 end
 
-map("n", "<leader>rr", ":%s/", { desc = "Rename Symbols" })
+map({ "n", "v" }, "<leader>rr", function()
+  local mode = vim.fn.mode()
+  local selected = get_last_visual_selection()
+  local target = (selected and selected ~= "") and selected or vim.fn.expand("<cword>")
+  local pattern = escape_for_substitute(target)
+
+  if mode:match("[vV\22]") then
+    vim.cmd("normal! <Esc>")
+  end
+
+  vim.fn.feedkeys(":%s/" .. pattern .. "/", "n")
+end, { desc = "Rename Symbols" })
+
+local function open_global_substitute(pattern)
+  if not pattern or pattern == "" then
+    vim.api.nvim_input(":%s/")
+    return
+  end
+
+  vim.fn.setreg("/", pattern)
+  local cmd = vim.api.nvim_replace_termcodes(":%s/<C-r>//", true, false, true)
+  vim.api.nvim_input(cmd)
+end
+
+map("n", "<A-s>", ":%s/", { desc = "Global substitute" })
+
+map("n", "<A-d>", function()
+  local word = vim.fn.expand("<cword>")
+  open_global_substitute(word)
+end, { desc = "Global substitute current word" })
+
+map({ "n", "v" }, "<A-f>", function()
+  local mode = vim.fn.mode()
+  if not mode:match("[vV\22]") then
+    open_global_substitute(nil)
+    return
+  end
+
+  local saved = vim.fn.getreg("z")
+  local saved_type = vim.fn.getregtype("z")
+
+  vim.cmd('normal! "zy')
+  local selected = vim.fn.getreg("z")
+  vim.fn.setreg("z", saved, saved_type)
+
+  local escaped = "\\V" .. selected:gsub("\\", "\\\\"):gsub("/", "\\/"):gsub("\n", "\\n")
+  local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+  vim.api.nvim_input(esc)
+  open_global_substitute(escaped)
+end, { desc = "Global substitute visual selection" })
 
 -- toggleterm keymaps
 set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })

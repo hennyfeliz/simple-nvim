@@ -17,6 +17,7 @@ end
 return require("lazy").setup({
   require("plugins.snacks"),
   require("plugins.snacks-picker"),
+  require("plugins.persistence"),
   require("plugins.plenary"),
   require("plugins.telescope"),
   require("plugins.lazygit"),

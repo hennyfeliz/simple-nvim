@@ -20,6 +20,42 @@ return {
       local api = require("nvim-tree.api")
       api.config.mappings.default_on_attach(bufnr)
       vim.keymap.del("n", "<C-k>", { buffer = bufnr })
+
+      local function open_keep_focus_and_step()
+        local tree_win = vim.api.nvim_get_current_win()
+        local cursor = vim.api.nvim_win_get_cursor(tree_win)
+        local current_line = cursor[1]
+        local max_line = vim.api.nvim_buf_line_count(bufnr)
+        local has_next = current_line < max_line
+
+        local node = api.tree.get_node_under_cursor()
+        if not node then
+          return
+        end
+
+        local is_file = node.type == "file" or (node.nodes == nil)
+
+        -- For directories, keep default behavior.
+        if not is_file then
+          api.node.open.edit()
+          return
+        end
+
+        api.node.open.edit()
+
+        if vim.api.nvim_win_is_valid(tree_win) then
+          vim.api.nvim_set_current_win(tree_win)
+          if has_next then
+            local new_max = vim.api.nvim_buf_line_count(bufnr)
+            local target = math.min(current_line + 1, new_max)
+            vim.api.nvim_win_set_cursor(tree_win, { target, 0 })
+          end
+        end
+      end
+
+      -- Shift+L quick open from tree (reliable in terminals where Shift+Enter is not distinct).
+      vim.keymap.set("n", "<S-l>", open_keep_focus_and_step,
+        { buffer = bufnr, noremap = true, silent = true, desc = "Open file and stay in tree" })
     end
 
     local function dap_sync_close_for_explorer()
