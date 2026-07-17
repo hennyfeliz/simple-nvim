@@ -52,6 +52,11 @@ require("catppuccin").setup({
 -- setup must be called before loading
 vim.cmd.colorscheme "catppuccin"
 
+-- Fondo: Neovim no puede poner una imagen JPG como background.
+-- La imagen vive en Windows Terminal (profiles.defaults.backgroundImage)
+-- y se ve aquí porque Catppuccin + estos grupos están transparentes.
+-- Imagen: C:\Users\henny\Downloads\wp3056694-kanna-wallpapers.jpg
+
 -- Fondo transparente para los grupos base y flotantes
 local transparent_groups = {
 	"Normal",
