@@ -91,6 +91,7 @@ return {
     ins_left { 'filesize', cond = conditions.buffer_not_empty }
     ins_left {
       'filename',
+      path  = 3, -- absolute path, shorten home to ~
       cond  = conditions.buffer_not_empty,
       color = { fg = colors.magenta, gui = 'bold' },
     }

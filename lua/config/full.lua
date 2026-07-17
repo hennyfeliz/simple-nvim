@@ -382,7 +382,7 @@ require("nvim-web-devicons").setup({
             lualine_a = { "mode" },
             lualine_b = { "branch" },
             lualine_c = {
-                { "filename",    file_status = true,                        path = 0 },
+                { "filename",    file_status = true,                        path = 3 },
                 { server_status, color = { fg = "#ffffff", bg = "NONE" } }, -- Custom server status
             },
             lualine_x = {
@@ -401,7 +401,7 @@ require("nvim-web-devicons").setup({
             lualine_a = {},
             lualine_b = {},
             lualine_c = {
-                { "filename", file_status = true, path = 1 },
+                { "filename", file_status = true, path = 3 },
             },
             lualine_x = { "location" },
             lualine_y = {},

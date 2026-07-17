@@ -212,7 +212,7 @@ require("lualine").setup({
     lualine_a = { "mode" },
     lualine_b = { "branch" },
     lualine_c = {
-      { "filename", file_status = true, path = 0 },
+      { "filename", file_status = true, path = 3 },
     },
     lualine_x = { "encoding", "filetype" },
     lualine_y = { "progress" },
@@ -222,7 +222,7 @@ require("lualine").setup({
     lualine_a = {},
     lualine_b = {},
     lualine_c = {
-      { "filename", file_status = true, path = 1 },
+      { "filename", file_status = true, path = 3 },
     },
     lualine_x = { "location" },
     lualine_y = {},
