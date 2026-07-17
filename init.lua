@@ -127,6 +127,21 @@ vim.opt.expandtab = true -- default; Java lo sobreescribimos a tabs en on_attach
 vim.opt.smartindent = true
 vim.opt.wrap = true
 
+-- Windows clipboard provider (clip.exe + PowerShell)
+-- Sin esto, "+y nunca llegaría al portapapeles del sistema en Windows
+vim.g.clipboard = {
+  name = 'win-clipboard',
+  copy = {
+    ['+'] = 'clip.exe',
+    ['*'] = 'clip.exe',
+  },
+  paste = {
+    ['+'] = 'powershell -NoProfile -Command "Get-Clipboard | Set-Content -Path CON"',
+    ['*'] = 'powershell -NoProfile -Command "Get-Clipboard | Set-Content -Path CON"',
+  },
+  cache_enabled = true,
+}
+
 function get_visual_selection()
   -- Save current register
   local saved_reg = vim.fn.getreg('"')
