@@ -146,6 +146,30 @@ map('n', '<leader>y', '"+y', { desc = 'Yank into " register' })
 map('v', '<leader>y', '"+y', { desc = 'Yank into " register' })
 map('n', '<leader>Y', '"+Y', { desc = 'Yank into " register' })
 -- map('n', '<leader>ya', 'gg<S-v><S-g>"+Y', { desc = 'Yank all into " register' })
+
+-- Copy visual selection to system clipboard (Ctrl+C)
+map('v', '<C-c>', '"+y', { desc = 'Copy to system clipboard' })
+
+-- Paste from system clipboard (Ctrl+V)
+map('i', '<C-v>', '<C-r>+', { desc = 'Paste from system clipboard' })
+map('c', '<C-v>', '<C-r>+', { desc = 'Paste from system clipboard' })
+
+-- Fallback: C-q si el terminal intercepta C-v
+map('i', '<C-q>', '<C-r>+', { desc = 'Paste from system clipboard (fallback)' })
+map('c', '<C-q>', '<C-r>+', { desc = 'Paste from system clipboard (fallback)' })
+
+-- Copy full file path to system clipboard (fp)
+map('n', '<leader>fp', function()
+  local path = vim.fn.expand('%:p')
+  vim.fn.setreg('+', '"' .. path .. '"')
+end, { desc = 'Copy full file path to clipboard' })
+
+-- Copy directory path to system clipboard (dp)
+map('n', '<leader>dp', function()
+  local path = vim.fn.expand('%:p:h')
+  vim.fn.setreg('+', '"' .. path .. '"')
+end, { desc = 'Copy directory path to clipboard' })
+
 -- map('n', '<leader>as', 'gg<S-v><S-g><leader>"+y', { desc = 'Yank all into " register' })
 
 -- reeplace everything
