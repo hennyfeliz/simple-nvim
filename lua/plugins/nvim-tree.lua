@@ -15,7 +15,7 @@ return {
     -- optionally enable 24-bit colour
     vim.opt.termguicolors = true
 
-    -- Función on_attach personalizada
+    -- Funcion on_attach personalizada
     local function on_attach(bufnr)
       local api = require("nvim-tree.api")
       api.config.mappings.default_on_attach(bufnr)
@@ -56,6 +56,24 @@ return {
       -- Shift+L quick open from tree (reliable in terminals where Shift+Enter is not distinct).
       vim.keymap.set("n", "<S-l>", open_keep_focus_and_step,
         { buffer = bufnr, noremap = true, silent = true, desc = "Open file and stay in tree" })
+
+      -- Multi-seleccion (marks)
+      vim.keymap.set("n", "<Tab>",   function() api.marks.toggle() end,       { buffer = bufnr, desc = "Toggle mark" })
+      vim.keymap.set("n", "<S-Tab>", function() api.marks.clear() end,        { buffer = bufnr, desc = "Clear all marks" })
+      vim.keymap.set("n", "<C-d>",   function() api.marks.clear() end,        { buffer = bufnr, desc = "Unmark all visible" })
+
+      -- Ctrl+A: mark all visible nodes by walking each line of the tree buffer
+      vim.keymap.set("n", "<C-a>", function()
+        local count = vim.api.nvim_buf_line_count(bufnr)
+        for ln = 2, count do
+          pcall(vim.api.nvim_win_set_cursor, 0, { ln, 0 })
+          pcall(api.marks.toggle)
+        end
+      end, { buffer = bufnr, desc = "Mark all visible" })
+
+      -- Bulk actions sobre nodos marcados
+      vim.keymap.set("n", "<leader>md", function() api.marks.bulk.trash() end, { buffer = bufnr, desc = "Trash marked" })
+      vim.keymap.set("n", "<leader>mm", function() api.marks.bulk.move() end,  { buffer = bufnr, desc = "Move marked" })
     end
 
     local function dap_sync_close_for_explorer()
