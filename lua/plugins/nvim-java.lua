@@ -94,12 +94,25 @@ return {
             return nil
         end
 
-        -- Ajustes recomendados para que JDTLS reimporte Maven y resuelva dependencias externas
+        -- Ajustes conservadores: la importación automática puede provocar ciclos de
+        -- reindexación muy costosos en proyectos Maven grandes.
         local jdk21 = detect_jdk21()
+        local java_root_markers = {
+            "pom.xml",
+            "mvnw",
+            "gradlew",
+            "build.gradle",
+            "build.gradle.kts",
+            "settings.gradle",
+            "settings.gradle.kts",
+            ".git",
+        }
         local jdt_settings = {
             java = {
                 configuration = {
-                    updateBuildConfiguration = "automatic",
+                    updateBuildConfiguration = vim.g.java_auto_update_build_configuration == true
+                        and "automatic"
+                        or "interactive",
                     runtimes = (function()
                         if jdk21 then
                             return {
@@ -123,11 +136,74 @@ return {
             },
         }
 
+        -- Evita que una configuración heredada o un proyecto corrupto pueda reservar
+        -- decenas de GB. Se conserva la configuración del servidor y sólo se acota
+        -- el heap de la JVM de JDTLS.
+        local function cap_jdtls_memory(command)
+            if type(command) ~= "table" then
+                return command
+            end
+
+            local capped = {}
+            local has_xmx = false
+            for _, argument in ipairs(command) do
+                if type(argument) == "string" and argument:match("^%-Xmx") then
+                    table.insert(capped, "-Xmx2048m")
+                    has_xmx = true
+                elseif type(argument) == "string" and argument:match("^%-Xms") then
+                    table.insert(capped, "-Xms256m")
+                else
+                    table.insert(capped, argument)
+                end
+            end
+
+            if not has_xmx then
+                table.insert(capped, math.min(2, #capped + 1), "-Xmx2048m")
+            end
+            return capped
+        end
+
         -- 2) Registrar JDTLS con vim.lsp.config DESPUÉS de java.setup() con root y settings explícitos
         local function detect_root(fname)
             local path = fname or vim.api.nvim_buf_get_name(0)
-            return vim.fs.root(path, { "pom.xml", "mvnw", "gradlew", "build.gradle", "settings.gradle", ".git" })
+            return vim.fs.root(path, java_root_markers)
                 or vim.loop.cwd()
+        end
+
+        local function workspace_for_root(root)
+            local normalized = vim.fs.normalize(root or vim.loop.cwd())
+            local project_id = string.gsub(normalized, "[/\\:+-]", "_")
+            return vim.fs.joinpath(vim.fn.stdpath("cache"), "jdtls-optimized", "workspaces", project_id)
+        end
+
+        local function workspace_command(command, workspace)
+            if type(command) ~= "table" then
+                return command
+            end
+
+            local updated = {}
+            local expecting_workspace = false
+            local has_data = false
+            for _, argument in ipairs(command) do
+                if expecting_workspace then
+                    table.insert(updated, workspace)
+                    expecting_workspace = false
+                else
+                    table.insert(updated, argument)
+                    if argument == "-data" then
+                        expecting_workspace = true
+                        has_data = true
+                    end
+                end
+            end
+
+            if expecting_workspace then
+                table.insert(updated, workspace)
+            elseif not has_data then
+                table.insert(updated, "-data")
+                table.insert(updated, workspace)
+            end
+            return updated
         end
 
         local base_jdtls = {}
@@ -135,15 +211,42 @@ return {
             local ok_server, server = pcall(require, "java-core.ls.servers.jdtls")
             if ok_server and server and type(server.get_config) == "function" then
                 base_jdtls = server.get_config({
-                    root_markers = { "pom.xml", "mvnw", "gradlew", "build.gradle", "settings.gradle", ".git" },
+                    root_markers = java_root_markers,
                     jdtls_plugins = { "java-test", "java-debug-adapter" },
                     use_mason_jdk = true,
                 }) or {}
             end
         end
+        base_jdtls.cmd = cap_jdtls_memory(base_jdtls.cmd)
+
+        -- nvim-java-core calcula -data al cargar el plugin, usando el cwd. Aquí
+        -- se vuelve dinámico por root y se migra a una ruta v2 para no reutilizar
+        -- índices antiguos/corruptos. La ruta anterior queda intacta y reversible.
+        local original_cmd = base_jdtls.cmd
+        local original_before_init = base_jdtls.before_init
+        base_jdtls.cmd = function(dispatchers, config)
+            local root = config.root_dir or detect_root(vim.api.nvim_buf_get_name(0))
+            local workspace = workspace_for_root(root)
+            return vim.lsp.rpc.start(workspace_command(original_cmd, workspace), dispatchers, {
+                cwd = config.cmd_cwd or root,
+                env = config.cmd_env,
+                detached = false,
+            })
+        end
+        base_jdtls.before_init = function(params, config)
+            params.initializationOptions = params.initializationOptions or {}
+            params.initializationOptions.workspace = workspace_for_root(config.root_dir)
+            if original_before_init then
+                return original_before_init(params, config)
+            end
+        end
 
         vim.lsp.config("jdtls", vim.tbl_deep_extend("force", base_jdtls, {
             root_dir = function(bufnr, on_dir)
+                if vim.b[bufnr].bigfile == true then
+                    vim.notify("Java: JDTLS omitido para este archivo grande", vim.log.levels.WARN)
+                    return
+                end
                 on_dir(detect_root(vim.api.nvim_buf_get_name(bufnr)))
             end,
             settings = jdt_settings,
@@ -363,12 +466,15 @@ return {
             end)
         end, { desc = "Estado rapido Java LSP/DAP" })
 
-        -- 5) Auto-refresh cuando cambie el pom.xml
-        vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-            pattern = { "pom.xml" },
-            callback = function()
-                pcall(vim.cmd, "JavaRefresh")
-            end,
-        })
+        -- 5) El refresco automático queda opt-in. Usar :JavaRefresh cuando Maven
+        -- haya cambiado; así guardar un pom no dispara reimportaciones repetidas.
+        if vim.g.java_auto_refresh_pom == true then
+            vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+                pattern = { "pom.xml" },
+                callback = function()
+                    pcall(vim.cmd, "JavaRefresh")
+                end,
+            })
+        end
     end,
 }

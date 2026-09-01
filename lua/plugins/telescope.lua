@@ -1,8 +1,10 @@
 -- 2) Telescope
 return {
   "nvim-telescope/telescope.nvim",
+  cmd = "Telescope",
   dependencies = { "nvim-lua/plenary.nvim" },
   opts = function(_, opts)
+    local actions = require("telescope.actions")
     local ivy = require("telescope.themes").get_ivy({
       layout_config = { height = 0.50, preview_width = 0.5 },
       -- remove titles
@@ -69,7 +71,14 @@ return {
         prompt = { " ", " ", " ", " ", " ", " ", " ", " " },
         results = { " ", " ", " ", " ", " ", " ", " ", " " },
         preview = { " ", "│", " ", " ", " ", " ", " ", " " },
-      }, 
+      },
+      mappings = {
+        i = {
+          ["<C-j>"] = actions.move_selection_next,
+          ["<C-k>"] = actions.move_selection_previous,
+          ["<C-l>"] = actions.select_default,
+        },
+      },
     }
     end,
 }

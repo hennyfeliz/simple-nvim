@@ -78,6 +78,7 @@ for _, group in ipairs(transparent_groups) do
 end
 
 -- ONEDARK CONFIGURATION (COMMENTED OUT) - EL TEMA MÁS OSCURO
+--[[
 require("onedark").setup({
 	-- Main options --
 	style = "darker",       -- Default theme style. Choose between 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer' and 'light'
@@ -120,3 +121,4 @@ require("onedark").setup({
 
 -- Activar OneDark
 -- vim.cmd.colorscheme "onedark")
+]]

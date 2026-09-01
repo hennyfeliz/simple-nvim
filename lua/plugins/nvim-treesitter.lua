@@ -1,8 +1,10 @@
 -- nvim treesitter
 return {
   "nvim-treesitter/nvim-treesitter",
+  event = { "BufReadPre", "BufNewFile" },
   build = ":TSUpdate",
   config = function()
+    require("nvim-treesitter.install").compilers = { "zig" }
     local configs = require("nvim-treesitter.configs")
 
     configs.setup({
@@ -26,7 +28,6 @@ return {
         "html",
         "terraform",
         "go",
-        "tsx",
         "bash",
         "ruby",
         "markdown",
@@ -34,8 +35,18 @@ return {
         "astro",
       },
       sync_install = false,
-      highlight = { enable = true },
-      indent = { enable = true },
+      highlight = {
+        enable = true,
+        disable = function(_, bufnr)
+          return bufnr ~= nil and vim.b[bufnr].bigfile == true
+        end,
+      },
+      indent = {
+        enable = true,
+        disable = function(_, bufnr)
+          return bufnr ~= nil and vim.b[bufnr].bigfile == true
+        end,
+      },
       incremental_selection = {
         enable = true,
         keymaps = {

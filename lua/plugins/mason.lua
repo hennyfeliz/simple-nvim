@@ -1,7 +1,7 @@
 -- Mason core plugin
 return {
   "williamboman/mason.nvim",
-  lazy = false, -- cargar al inicio para registrar autocmds (sonarlint)
+  lazy = false, -- Mason registra herramientas y servidores LSP
   cmd = "Mason",
   keys = {
     { "<leader>m", "<cmd>Mason<CR>", desc = "Open Mason" },
@@ -47,7 +47,11 @@ return {
       if vim.fn.executable(exe) == 1 then
         table.insert(cmd, exe)
       else
-        table.insert(cmd, "sonarlint-language-server")
+        local global_exe = vim.fn.exepath("sonarlint-language-server")
+        if global_exe == "" then
+          return nil
+        end
+        table.insert(cmd, global_exe)
       end
       table.insert(cmd, "-stdio")
 
@@ -63,20 +67,39 @@ return {
       return cmd
     end
 
+    local java_root_markers = { "pom.xml", "mvnw", "gradlew", "build.gradle", "settings.gradle", ".git" }
+
     local function detect_root(fname)
       local path = fname or vim.api.nvim_buf_get_name(0)
-      return vim.fs.root(path, { "pom.xml", "mvnw", "gradlew", "build.gradle", ".git" }) or vim.loop.cwd()
+      return vim.fs.root(path, java_root_markers) or vim.loop.cwd()
     end
 
-    vim.api.nvim_create_autocmd({ "FileType", "BufReadPost", "BufEnter" }, {
-      pattern = { "java" },
-      callback = function(args)
-        local root = detect_root(vim.api.nvim_buf_get_name(args.buf))
-        local existing = vim.lsp.get_clients({ name = "sonarlint", bufnr = args.buf })
-        if existing and #existing > 0 then return end
+    local function start_sonarlint(bufnr)
+      if vim.bo[bufnr].filetype ~= "java" then
+        vim.notify("SonarLint: el buffer actual no es Java", vim.log.levels.WARN)
+        return
+      end
+
+      local root = detect_root(vim.api.nvim_buf_get_name(bufnr))
+      local normalized_root = vim.fs.normalize(root)
+      for _, client in ipairs(vim.lsp.get_clients({ name = "sonarlint" })) do
+        local client_root = client.config and client.config.root_dir
+        if client_root and vim.fs.normalize(client_root) == normalized_root then
+          vim.notify("SonarLint ya está activo para este proyecto", vim.log.levels.INFO)
+          return
+        end
+      end
+
+      local cmd = build_sonarlint_cmd()
+      if not cmd then
+        vim.notify("SonarLint no está instalado en Mason", vim.log.levels.ERROR)
+        return
+      end
+
+      vim.api.nvim_buf_call(bufnr, function()
         vim.lsp.start({
           name = "sonarlint",
-          cmd = build_sonarlint_cmd(),
+          cmd = cmd,
           root_dir = root,
           filetypes = { "java" },
           on_attach = function(_, bufnr)
@@ -84,7 +107,38 @@ return {
           end,
           settings = { sonarlint = { telemetry = { enabled = false } } },
         })
-      end,
+      end)
+    end
+
+    local function stop_sonarlint()
+      local root = vim.fs.normalize(detect_root(vim.api.nvim_buf_get_name(0)))
+      local stopped = false
+      for _, client in ipairs(vim.lsp.get_clients({ name = "sonarlint" })) do
+        local client_root = client.config and client.config.root_dir
+        if client_root and vim.fs.normalize(client_root) == root then
+          client.stop(true)
+          stopped = true
+        end
+      end
+      vim.notify(stopped and "SonarLint detenido para este proyecto" or "SonarLint no estaba activo", vim.log.levels.INFO)
+    end
+
+    vim.api.nvim_create_user_command("JavaStartSonarLint", function()
+      start_sonarlint(0)
+    end, { desc = "Inicia SonarLint sólo para el proyecto Java actual" })
+
+    vim.api.nvim_create_user_command("JavaStopSonarLint", stop_sonarlint, {
+      desc = "Detiene SonarLint del proyecto Java actual",
     })
+
+    -- Compatibilidad opcional: sólo se activa si el usuario la solicita explícitamente.
+    if vim.g.java_sonarlint_autostart == true or vim.env.NVIM_SONARLINT == "1" then
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "java",
+        callback = function(args)
+          start_sonarlint(args.buf)
+        end,
+      })
+    end
   end,
 }

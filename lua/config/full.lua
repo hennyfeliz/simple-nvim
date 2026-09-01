@@ -9,51 +9,15 @@ if vim.lsp._request_name_to_capability == nil then
     })
 end
 
-require("nvim-treesitter.install").compilers = { "zig" }
-local servers = require("servers.config")
-
-local cmp = require("cmp")
-local actions = require("telescope.actions")
-local status, lualine = pcall(require, "lualine")
-if not status then
-    return
-end
-
-local lualine_theme = require("lualine.themes.catppuccin")
-for _, mode in pairs(lualine_theme) do
-    for _, section in pairs(mode) do
-        section.bg = "NONE"
-    end
-end
-
-local function server_status()
-    local status = {}
-    for name, server in pairs(servers) do
-        if server.job_id then
-            table.insert(status, name .. ": Running")
-        else
-            table.insert(status, name .. ": Stopped")
-        end
-    end
-    return table.concat(status, " | ")
-end
-
--- Configuración de Telescope...
-require("telescope").setup({
-    defaults = {
-        mappings = {
-            i = {
-                ["<C-j>"] = actions.move_selection_next,
-                ["<C-k>"] = actions.move_selection_previous,
-                ["<C-l>"] = actions.select_default,
-            },
-        },
-    },
-})
-
+-- Telescope y Treesitter se configuran en sus especificaciones de plugin para
+-- no forzar su carga durante el arranque.
 
 -- animations - tiny glimmer
-require("tiny-glimmer").setup({
+vim.api.nvim_create_autocmd("User", {
+    pattern = "VeryLazy",
+    once = true,
+    callback = function()
+        require("tiny-glimmer").setup({
     -- Enable/disable the plugin
     enabled = true,
 
@@ -61,7 +25,7 @@ require("tiny-glimmer").setup({
     disable_warnings = true,
 
     -- Animation refresh rate in milliseconds
-    refresh_interval_ms = 8,
+    refresh_interval_ms = 16,
 
     -- Automatic keybinding overwrites
     overwrite = {
@@ -232,6 +196,8 @@ require("tiny-glimmer").setup({
     virt_text = {
         priority = 2048, -- Higher values appear above other plugins
     },
+        })
+    end,
 })
 
 -- Default configuration with all available options
@@ -310,152 +276,23 @@ vim.diagnostic.config({
     update_in_insert = false,
 })
 
-
--- snippets config
-require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/" })
-
-require("nvim-web-devicons").setup({
-    -- your personal icons can go here (to override)
-    -- you can specify color or cterm_color instead of specifying both of them
-    -- DevIcon will be appended to `name`
-    override = {
-        zsh = {
-            icon = "",
-            color = "#428850",
-            cterm_color = "65",
-            name = "Zsh",
-        },
+vim.filetype.add({
+    extension = {
+        jsx = "javascriptreact",
     },
-    -- globally enable different highlight colors per icon (default to true)
-    -- if set to false all icons will have the default icon's color
-    color_icons = true,
-    -- globally enable default icons (default to false)
-    -- will get overriden by `get_icons` option
-    default = true,
-    -- globally enable "strict" selection of icons - icon will be looked up in
-    -- different tables, first by filename, and if not found by extension; this
-    -- prevents cases when file doesn't have any extension but still gets some icon
-    -- because its name happened to match some extension (default to false)
-    strict = true,
-    -- set the light or dark variant manually, instead of relying on `background`
-    -- (default to nil)
-    variant = "light|dark",
-    -- same as `override` but specifically for overrides by filename
-    -- takes effect when `strict` is true
-    override_by_filename = {
-        [".gitignore"] = {
-            icon = "",
-            color = "#f1502f",
-            name = "Gitignore",
-        },
-    },
-    -- same as `override` but specifically for overrides by extension
-    -- takes effect when `strict` is true
-    override_by_extension = {
-        ["log"] = {
-            icon = "",
-            color = "#81e043",
-            name = "Log",
-        },
-    },
-    -- same as `override` but specifically for operating system
-    -- takes effect when `strict` is true
-    override_by_operating_system = {
-        ["apple"] = {
-            icon = "",
-            color = "#A2AAAD",
-            cterm_color = "248",
-            name = "Apple",
-        },
-    },
-
-    -- lualine setup config
-    require("lualine").setup({
-        options = {
-            icons_enabled = true,
-            theme = lualine_theme,
-            section_separators = { left = "", right = "" },
-            component_separators = { left = "", right = "" },
-            disabled_filetypes = {},
-        },
-        sections = {
-            lualine_a = { "mode" },
-            lualine_b = { "branch" },
-            lualine_c = {
-                { "filename",    file_status = true,                        path = 3 },
-                { server_status, color = { fg = "#ffffff", bg = "NONE" } }, -- Custom server status
-            },
-            lualine_x = {
-                {
-                    "diagnostics",
-                    sources = { "nvim_diagnostic" },
-                    symbols = { error = " ", warn = " ", info = " ", hint = " " },
-                },
-                "encoding",
-                "filetype",
-            },
-            lualine_y = { "progress" },
-            lualine_z = { "location" },
-        },
-        inactive_sections = {
-            lualine_a = {},
-            lualine_b = {},
-            lualine_c = {
-                { "filename", file_status = true, path = 3 },
-            },
-            lualine_x = { "location" },
-            lualine_y = {},
-            lualine_z = {},
-        },
-        tabline = {},
-        extensions = { "fugitive" },
-    }),
-
-    cmp.setup({
-        snippet = {
-            expand = function(args)
-                require("luasnip").lsp_expand(args.body)
-            end,
-        },
-        sources = {
-            { name = "nvim_lsp" },
-            { name = "buffer" },
-            { name = "path" },
-            { name = "luasnip" },
-        },
-        mapping = cmp.mapping.preset.insert({
-            ["<Tab>"] = cmp.mapping.select_next_item(),
-            ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-            ["<CR>"] = cmp.mapping.confirm({ select = true }),
-        }),
-    }),
-
-    cmp.setup.filetype({ "sql" }, {
-        sources = {
-            { name = "vim-dadbod-completion" },
-            { name = "buffer" },
-        },
-    }),
-
-    vim.filetype.add({
-        extension = {
-            jsx = "javascriptreact",
-        },
-    }),
-
-    --
-    --
-    vim.treesitter.language.register("tsx", "javascriptreact"),
-
-    -- luasnip keymaps
-    vim.keymap.set({ "i", "s" }, "<Tab>", function()
-        return require("luasnip").jumpable(1) and require("luasnip").jump(1) or "<Tab>"
-    end, { expr = true, silent = true }),
-
-    vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
-        return require("luasnip").jumpable(-1) and require("luasnip").jump(-1) or "<S-Tab>"
-    end, { expr = true, silent = true }),
 })
+
+vim.treesitter.language.register("tsx", "javascriptreact")
+
+vim.keymap.set({ "i", "s" }, "<Tab>", function()
+    local luasnip = require("luasnip")
+    return luasnip.jumpable(1) and luasnip.jump(1) or "<Tab>"
+end, { expr = true, silent = true })
+
+vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
+    local luasnip = require("luasnip")
+    return luasnip.jumpable(-1) and luasnip.jump(-1) or "<S-Tab>"
+end, { expr = true, silent = true })
 
 vim.keymap.set("x", "p", '"_dP', { noremap = true, silent = true, desc = "Paste without overwriting yank" })
 

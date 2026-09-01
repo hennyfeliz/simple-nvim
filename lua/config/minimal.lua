@@ -7,37 +7,11 @@ if vim.lsp._request_name_to_capability == nil then
   })
 end
 
-require("nvim-treesitter.install").compilers = { "zig" }
-
-local actions = require("telescope.actions")
-local status, lualine_ok = pcall(require, "lualine")
-if not lualine_ok then
-  return
-end
-
-local lualine_theme = require("lualine.themes.catppuccin")
-for _, mode in pairs(lualine_theme) do
-  for _, section in pairs(mode) do
-    section.bg = "NONE"
-  end
-end
-
-require("telescope").setup({
-  defaults = {
-    mappings = {
-      i = {
-        ["<C-j>"] = actions.move_selection_next,
-        ["<C-k>"] = actions.move_selection_previous,
-        ["<C-l>"] = actions.select_default,
-      },
-    },
-  },
-})
-
+-- Telescope y Treesitter se cargan bajo demanda también en el modo limpio.
 require("tiny-glimmer").setup({
   enabled = true,
   disable_warnings = true,
-  refresh_interval_ms = 8,
+  refresh_interval_ms = 16,
   overwrite = {
     auto_map = true,
     yank = { enabled = true, default_animation = "fade" },
@@ -159,77 +133,6 @@ require("tiny-glimmer").setup({
     "snacks_dashboard",
   },
   virt_text = { priority = 2048 },
-})
-
-require("luasnip.loaders.from_lua").lazy_load({ paths = "~/AppData/Local/nvim/lua/snippets/" })
-
-require("nvim-web-devicons").setup({
-  override = {
-    zsh = {
-      icon = "",
-      color = "#428850",
-      cterm_color = "65",
-      name = "Zsh",
-    },
-  },
-  color_icons = true,
-  default = true,
-  strict = true,
-  variant = "light|dark",
-  override_by_filename = {
-    [".gitignore"] = {
-      icon = "",
-      color = "#f1502f",
-      name = "Gitignore",
-    },
-  },
-  override_by_extension = {
-    ["log"] = {
-      icon = "",
-      color = "#81e043",
-      name = "Log",
-    },
-  },
-  override_by_operating_system = {
-    ["apple"] = {
-      icon = "",
-      color = "#A2AAAD",
-      cterm_color = "248",
-      name = "Apple",
-    },
-  },
-})
-
-require("lualine").setup({
-  options = {
-    icons_enabled = true,
-    theme = lualine_theme,
-    section_separators = { left = "", right = "" },
-    component_separators = { left = "", right = "" },
-    disabled_filetypes = {},
-  },
-  sections = {
-    lualine_a = { "mode" },
-    lualine_b = { "branch" },
-    lualine_c = {
-      { "filename", file_status = true, path = 3 },
-    },
-    lualine_x = { "encoding", "filetype" },
-    lualine_y = { "progress" },
-    lualine_z = { "location" },
-  },
-  inactive_sections = {
-    lualine_a = {},
-    lualine_b = {},
-    lualine_c = {
-      { "filename", file_status = true, path = 3 },
-    },
-    lualine_x = { "location" },
-    lualine_y = {},
-    lualine_z = {},
-  },
-  tabline = {},
-  extensions = { "fugitive" },
 })
 
 vim.filetype.add({

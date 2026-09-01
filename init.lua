@@ -41,14 +41,51 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePre" }, {
   group = fix_crlf_group,
   pattern = "*",
   callback = function(args)
+    local buffer = args.buf
+    if vim.bo[buffer].buftype ~= "" or vim.bo[buffer].binary then
+      return
+    end
+
+    local was_dos = vim.bo[buffer].fileformat == "dos"
     -- siempre guardar como LF
-    vim.bo[args.buf].fileformat = "unix"
+    vim.bo[buffer].fileformat = "unix"
+
+    -- En guardado normal Neovim ya mantiene LF; sólo hay que revisar CR si el
+    -- archivo se leyó como DOS/CRLF. Esto evita un regex global en cada save.
+    if args.event == "BufWritePre" and not was_dos then
+      return
+    end
+
+    -- No hagas una sustitución global en buffers enormes: además de ser cara,
+    -- puede bloquear la interfaz durante la lectura de logs/generados.
+    if vim.api.nvim_buf_line_count(buffer) > 100000 then
+      return
+    end
+
     -- si hay CR literales (mostrados como ^M), eliminarlos
     local view = vim.fn.winsaveview()
-    vim.cmd([[%s/\r$//e]])
+    vim.api.nvim_buf_call(buffer, function()
+      vim.cmd([[%s/\r$//e]])
+    end)
     vim.fn.winrestview(view)
   end,
   desc = "Forzar finales de línea LF y limpiar ^M",
+})
+
+-- Marca buffers grandes antes de que los plugins de sintaxis/LSP intenten
+-- indexarlos. El umbral sólo afecta a archivos de más de 2 MiB.
+local bigfile_group = vim.api.nvim_create_augroup("BigFileGuard", { clear = true })
+vim.api.nvim_create_autocmd("BufReadPre", {
+  group = bigfile_group,
+  pattern = "*",
+  callback = function(args)
+    local name = vim.api.nvim_buf_get_name(args.buf)
+    local stat = vim.loop.fs_stat(name)
+    if stat and stat.size > 2 * 1024 * 1024 then
+      vim.b[args.buf].bigfile = true
+    end
+  end,
+  desc = "Marca archivos grandes para evitar indexación costosa",
 })
 
 vim.g.mapleader = " "

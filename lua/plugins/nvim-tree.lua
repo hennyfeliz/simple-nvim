@@ -109,7 +109,7 @@ return {
       },
       update_focused_file = {
         enable      = true, -- auto-locate the current file
-        update_cwd  = true, -- also cd into its folder
+        update_cwd  = false, -- no cambia cwd y evita alterar el workspace de JDTLS
         ignore_list = {},   -- files/dirs to skip, if any
       },
     })

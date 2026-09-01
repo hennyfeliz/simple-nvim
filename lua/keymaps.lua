@@ -36,14 +36,6 @@ local function escape_for_substitute(text)
   return "\\V" .. escaped
 end
 
--- CodeCompanion
-map("n", "<leader>cc", "<cmd>CodeCompanion<cr>", { desc = "Chat" })
-map("v", "<leader>cc", "<cmd>CodeCompanion<cr>", { desc = "Chat sobre selección" })
-map("n", "<leader>cr", "<cmd>CodeCompanionActions<cr>", { desc = "Acciones (inline)" })
-
--- Avante
-map("n", "<leader>av", "<cmd>Avante<cr>", { desc = "Abrir panel Avante" })
-
 -- Telescope's built-in pickers
 map("n", "<leader>ff", function()
   require("telescope.builtin").find_files()
@@ -82,8 +74,8 @@ end, { desc = "Search text inside quotes with telescope" })
 
 -- File browser extension
 map("n", "<leader>fe", function()
-  require("telescope").extensions.file_browser.file_browser()
-end, { desc = "File browser" })
+  Snacks.explorer()
+end, { desc = "File browser (Snacks)" })
 
 -- normal mode
 map("n", "sj", "i<CR><esc>")
@@ -332,7 +324,9 @@ map("n", "<leader>P", '"0P', { desc = "Paste last yank (before cursor)" })
 
 -- resume last Telescope picker (incl. live_grep) with your previous query
 map('n', '<leader>fk',
-  require('telescope.builtin').resume,
+  function()
+    require('telescope.builtin').resume()
+  end,
   { silent = true, desc = 'Resume last Telescope search' }
 )
 

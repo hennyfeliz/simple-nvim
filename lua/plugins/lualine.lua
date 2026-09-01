@@ -41,7 +41,7 @@ return {
       options = {
         component_separators = '',
         section_separators   = '',
-        theme = 'onedark',
+        theme = 'catppuccin',
       },
       sections = {
         lualine_a = {},
@@ -165,4 +165,3 @@ return {
     lualine.setup(config)
   end,
 }
-

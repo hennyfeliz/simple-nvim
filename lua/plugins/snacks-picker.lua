@@ -16,9 +16,9 @@ return {
       },
       picker = { enabled = true },
       quickfile = { enabled = true },
-      scope = { enabled = true },
-      scroll = { enabled = true },
-      statuscolumn = { enabled = true },
+      scope = { enabled = false },
+      scroll = { enabled = false },
+      statuscolumn = { enabled = false },
       words = { enabled = true },
       styles = {
         notification = {

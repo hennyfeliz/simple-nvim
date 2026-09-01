@@ -6,14 +6,7 @@ return {
     "williamboman/mason.nvim",
     "williamboman/mason-lspconfig.nvim",
     "hrsh7th/cmp-nvim-lsp",
-    "hrsh7th/cmp-buffer",
-    "hrsh7th/cmp-path",
-    "hrsh7th/cmp-cmdline",
-    "hrsh7th/nvim-cmp",
-    "L3MON4D3/LuaSnip",
-    "saadparwaiz1/cmp_luasnip",
     "j-hui/fidget.nvim",
-    "saghen/blink.cmp",
 
     {
       "folke/lazydev.nvim",
@@ -35,40 +28,41 @@ return {
       })
     end
 
-    -- Setup formatters
-    require("conform").setup({ formatters_by_ft = {} })
-
-    -- LSP capabilities from blink.cmp
-    local capabilities = require("blink.cmp").get_lsp_capabilities()
+    -- Completion remains provided by nvim-cmp; no se cargan dos engines LSP.
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
     -- Mason setup
-    require("mason").setup()
     require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls", "html", "cssls", "jsonls" },
-    })
-
-    -- Lua LSP setup
-    vim.lsp.config("lua_ls", {
-      capabilities = capabilities,
-      settings = {
-        Lua = {
-          runtime = { version = "LuaJIT" },
-          diagnostics = { globals = { "vim" } },
-          workspace = {
-            library = vim.api.nvim_get_runtime_file("", true),
-            checkThirdParty = false,
-          },
-          telemetry = { enable = false },
-        },
+      ensure_installed = {
+        "lua_ls",
+        "rust_analyzer",
+        "gopls",
+        "html",
+        "cssls",
+        "emmet_ls",
+        "ts_ls",
+        "jsonls",
       },
-    })
-    vim.lsp.enable("lua_ls")
-
-    -- Mason setup for other servers
-    require("mason-lspconfig").setup({
-      ensure_installed = { "rust_analyzer", "gopls", "html", "cssls", "emmet_ls", "ts_ls" },
       handlers = {
+        ["lua_ls"] = function()
+          vim.lsp.config("lua_ls", {
+            capabilities = capabilities,
+            settings = {
+              Lua = {
+                runtime = { version = "LuaJIT" },
+                diagnostics = { globals = { "vim" } },
+                workspace = {
+                  library = vim.api.nvim_get_runtime_file("", true),
+                  checkThirdParty = false,
+                },
+                telemetry = { enable = false },
+              },
+            },
+          })
+          vim.lsp.enable("lua_ls")
+        end,
         function(server_name)
+          if server_name == "lua_ls" or server_name == "jdtls" then return end
           vim.lsp.config(server_name, { capabilities = capabilities })
           vim.lsp.enable(server_name)
         end,
@@ -167,29 +161,6 @@ return {
         end, vim.tbl_extend("force", opts, { desc = "Java Generators (local)" }))
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
       end,
-    })
-
-    -- cmp setup
-    local cmp = require("cmp")
-    local cmp_select = { behavior = cmp.SelectBehavior.Select }
-    cmp.setup({
-      snippet = {
-        expand = function(args)
-          require("luasnip").lsp_expand(args.body)
-        end,
-      },
-      mapping = cmp.mapping.preset.insert({
-        ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
-        ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
-        ["<C-y>"] = cmp.mapping.confirm({ select = true }),
-        ["<C-Space>"] = cmp.mapping.complete(),
-      }),
-      sources = cmp.config.sources({
-        { name = "nvim_lsp" },
-        { name = "luasnip" },
-      }, {
-        { name = "buffer" },
-      }),
     })
 
     -- Diagnostics config

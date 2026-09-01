@@ -47,7 +47,7 @@ return {
     },
   },
   opts = {
-    bigfile = { enabled = false },
+    bigfile = { enabled = true },
     dashboard = {
       preset = {
         pick = nil,
@@ -90,16 +90,17 @@ return {
         { section = "startup" },
       },
     },
-    explorer = { enabled = false },
+    explorer = { enabled = true },
     indent = { enabled = true },
     input = { enabled = true },
     terminal = { enabled = true },
-    picker = { enabled = false },
-    notifier = { enabled = false },
+    picker = { enabled = true },
+    notifier = { enabled = true, timeout = 3000 },
     quickfile = { enabled = true },
     scope = { enabled = false },
+    scroll = { enabled = false },
     statuscolumn = { enabled = false },
-    words = { enabled = false },
+    words = { enabled = true },
     rename = { enabled = true },
     zen = {
       enabled = true,
