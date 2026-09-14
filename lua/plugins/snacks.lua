@@ -90,6 +90,14 @@ return {
         { section = "startup" },
       },
     },
+    lazygit = {
+      -- El cero indica el ancho y alto completos de la ventana de Neovim.
+      win = {
+        width = 0,
+        height = 0,
+        border = "none",
+      },
+    },
     explorer = { enabled = true },
     indent = { enabled = true },
     input = { enabled = true },
