@@ -26,6 +26,8 @@ return require("lazy").setup({
     require("plugins.nvim-web-devicons"),
     require("plugins.nvim-treesitter"),
     require("plugins.gitsigns"),
+    require("plugins.mini-diff"),
+    require("plugins.codediff"),
     require("plugins.lualine"),
     require("plugins.luasnip"),
     require("plugins.nvim-tree"),

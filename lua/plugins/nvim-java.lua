@@ -12,6 +12,7 @@ return {
         -- "mfussenegger/nvim-dap",
     },
     config = function()
+        local icbr = require('java.icbr')
         -- Evita warning del framework legado de lspconfig al acceder `lspconfig.jdtls`
         -- desde nvim-java en Neovim 0.11+.
         local function prewarm_lspconfig_jdtls()
@@ -166,13 +167,16 @@ return {
         -- 2) Registrar JDTLS con vim.lsp.config DESPUÉS de java.setup() con root y settings explícitos
         local function detect_root(fname)
             local path = fname or vim.api.nvim_buf_get_name(0)
-            return vim.fs.root(path, java_root_markers)
+            return icbr.root(path) or vim.fs.root(path, java_root_markers)
                 or vim.loop.cwd()
         end
 
         local function workspace_for_root(root)
             local normalized = vim.fs.normalize(root or vim.loop.cwd())
             local project_id = string.gsub(normalized, "[/\\:+-]", "_")
+            if icbr.root(normalized) then
+                return vim.fs.joinpath(vim.fn.stdpath("cache"), "jdtls-icbr-java8-v2", project_id)
+            end
             return vim.fs.joinpath(vim.fn.stdpath("cache"), "jdtls-optimized", "workspaces", project_id)
         end
 
@@ -227,7 +231,8 @@ return {
         base_jdtls.cmd = function(dispatchers, config)
             local root = config.root_dir or detect_root(vim.api.nvim_buf_get_name(0))
             local workspace = workspace_for_root(root)
-            return vim.lsp.rpc.start(workspace_command(original_cmd, workspace), dispatchers, {
+            local command = icbr.root(root) and icbr.command(original_cmd, workspace) or original_cmd
+            return vim.lsp.rpc.start(workspace_command(command, workspace), dispatchers, {
                 cwd = config.cmd_cwd or root,
                 env = config.cmd_env,
                 detached = false,
@@ -237,7 +242,16 @@ return {
             params.initializationOptions = params.initializationOptions or {}
             params.initializationOptions.workspace = workspace_for_root(config.root_dir)
             if original_before_init then
-                return original_before_init(params, config)
+                original_before_init(params, config)
+            end
+            if icbr.root(config.root_dir) then
+                -- Neovim ya conserva una referencia a settings antes de before_init.
+                -- Mutar esa tabla evita reenviar los valores generales de Java 21.
+                config.settings.java = icbr.settings(config.root_dir).java
+                -- JDTLS necesita estos ajustes durante initialize, antes de importar.
+                params.initializationOptions.settings = config.settings
+                -- El cliente no implementa los dialogos/executeClientCommand de VS Code.
+                params.initializationOptions.extendedClientCapabilities = { classFileContentsSupport = true }
             end
         end
 
@@ -250,8 +264,13 @@ return {
                 on_dir(detect_root(vim.api.nvim_buf_get_name(bufnr)))
             end,
             settings = jdt_settings,
-            on_attach = function(_, bufnr)
+            on_attach = function(client, bufnr)
                 vim.diagnostic.enable(true, { bufnr = bufnr })
+                if icbr.root(client.config.root_dir) then
+                    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = bufnr, desc = 'Ir a definicion' })
+                    vim.keymap.set('n', 'gr', vim.lsp.buf.references, { buffer = bufnr, desc = 'Referencias' })
+                    vim.keymap.set('n', 'gl', vim.diagnostic.open_float, { buffer = bufnr, desc = 'Detalle del diagnostico' })
+                end
             end,
         }))
         vim.lsp.enable("jdtls")

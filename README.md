@@ -8,6 +8,38 @@ tema [Catppuccin](https://github.com/catppuccin/nvim)/OneDark, picker con
 [`snacks.nvim`](https://github.com/folke/snacks.nvim) + Telescope, y un
 **modo limpio** para arrancar sin LSP/lint/format cuando hace falta velocidad.
 
+### ICBR: Java 8 / NetBeans / Ant
+
+`icbrr` abre ahora el modo completo. Tras cambiar el perfil de PowerShell,
+ejecuta `. $PROFILE` y vuelve a abrir Neovim con `icbrr`. El servidor se conecta
+al abrir un archivo `.java`; `nvimc` sigue disponible para el modo sin LSP.
+
+El modelo en `lua/java/icbr.lua` reconoce ICBR por sus metadatos y fuentes:
+
+- Analiza `src/src/java` con el JDK 8 de `IcbrDev.ps1`.
+- Ejecuta JDTLS con el JDK 21 local, heap maximo de 1536 MB y dos procesadores.
+- Incluye los JAR de `src/lib` y las APIs locales de WebLogic, evitando JPA
+  duplicado. No importa Maven/Gradle ni descarga fuentes para ICBR.
+- Conserva sus indices y configuracion de Eclipse en una cache propia,
+  `stdpath('cache')/jdtls-icbr-java8-v2`. No cambia el build Ant ni CBS API.
+- Mantiene diagnosticos reales; las advertencias del codigo legacy no se ocultan.
+
+Atajos en Java de ICBR: `gd` definicion, `gr` referencias, `K` documentacion,
+`gl` detalle del diagnostico, `[d` / `]d` anterior/siguiente y `<Space>ld`
+lista de diagnosticos. `:LspClients` muestra el servidor conectado.
+
+Prueba reproducible desde la raiz de ICBR (edicion en memoria, sin guardar):
+
+```powershell
+nvim --headless src/src/java/JPAPersistence/CBSRubrosReportesJpaController.java -c "luafile $env:LOCALAPPDATA/nvim/tests/icbrLspSmoke.lua"
+Get-Content "$env:TEMP/icbr-lsp-smoke.json"
+```
+
+Valida una sola conexion JDTLS, definicion entre archivos, ausencia de falsos
+errores de imports y deteccion/correccion de un error de tipos. La primera
+indexacion puede tardar mas que las siguientes aperturas; esta prueba no
+sustituye una sesion interactiva prolongada.
+
 ---
 
 ## Requisitos

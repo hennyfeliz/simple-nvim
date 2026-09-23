@@ -95,8 +95,6 @@ return {
       cond  = conditions.buffer_not_empty,
       color = { fg = colors.magenta, gui = 'bold' },
     }
-    ins_left { 'location' }
-    ins_left { 'progress', color = { fg = colors.fg, gui = 'bold' } }
     ins_left {
       'diagnostics',
       sources = { 'nvim_diagnostic' },
@@ -128,6 +126,26 @@ return {
     }
 
     -- Right
+    -- Estado del overlay que alterna Espacio g o, independiente del seguimiento Git.
+    local function minidiff_overlay_state()
+      local diff = package.loaded['mini.diff']
+      local data = diff and diff.get_buf_data(0)
+      if not data then return 'N/A' end
+      return data.overlay and 'ON' or 'OFF'
+    end
+    ins_right {
+      function() return 'MiniDiff: ' .. minidiff_overlay_state() end,
+      color = function()
+        local state = minidiff_overlay_state()
+        return { fg = state == 'ON' and colors.green or (state == 'OFF' and colors.orange or colors.fg) }
+      end,
+    }
+    -- Refresca el indicador al alternar el overlay o actualizar los cambios.
+    vim.api.nvim_create_autocmd('User', {
+      group = vim.api.nvim_create_augroup('MiniDiffStatusline', { clear = true }),
+      pattern = 'MiniDiffUpdated',
+      callback = function() lualine.refresh({ place = { 'statusline' } }) end,
+    })
     ins_right {
       'o:encoding',
       fmt  = string.upper,
@@ -144,21 +162,6 @@ return {
       'branch',
       icon  = '',
       color = { fg = colors.violet, gui = 'bold' },
-    }
-    ins_right {
-      'diff',
-      symbols = { added = ' ', modified = '󰝤 ', removed = ' ' },
-      diff_color = {
-        added    = { fg = colors.green },
-        modified = { fg = colors.orange },
-        removed  = { fg = colors.red },
-      },
-      cond = conditions.hide_in_width,
-    }
-    ins_right {
-      function() return '▊' end,
-      color   = { fg = colors.blue },
-      padding = { left = 1 },
     }
 
     -- initialize!

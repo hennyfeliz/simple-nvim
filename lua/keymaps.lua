@@ -31,6 +31,24 @@ local function get_last_visual_selection()
   return text
 end
 
+local function get_current_visual_selection()
+  local saved_register = vim.fn.getreg("z")
+  local saved_register_type = vim.fn.getregtype("z")
+  local saved_cursor = vim.api.nvim_win_get_cursor(0)
+
+  vim.cmd('silent keepjumps normal! "zy')
+  local selected = vim.fn.getreg("z")
+
+  vim.fn.setreg("z", saved_register, saved_register_type)
+  vim.api.nvim_win_set_cursor(0, saved_cursor)
+
+  if selected == "" then
+    return nil
+  end
+
+  return selected
+end
+
 local function escape_for_substitute(text)
   local escaped = text:gsub("\\", "\\\\"):gsub("/", "\\/"):gsub("\n", "\\n")
   return "\\V" .. escaped
@@ -96,11 +114,6 @@ map("n", "<leader>aa", "gg<S-v><S-g>", { desc = "Select all" })
 --   "gg<S-v><S-g>:s/",
 --   { desc = "Select & search all" }
 -- )
-map("v", "<leader>r",
-  ":s/",
-  { desc = "Substitute in visual selection" }
-)
-
 -- window navigation
 map("n", "<C-j>", "<C-w>j", { noremap = true })
 map("n", "<C-k>", "<C-w>k", { noremap = true })
@@ -206,18 +219,31 @@ if not clean then
   map("n", "<leader>jr", ":JavaRefresh<Enter>", { desc = "Java Refresh" })
 end
 
-map({ "n", "v" }, "<leader>rr", function()
-  local mode = vim.fn.mode()
-  local selected = get_last_visual_selection()
-  local target = (selected and selected ~= "") and selected or vim.fn.expand("<cword>")
-  local pattern = escape_for_substitute(target)
-
-  if mode:match("[vV\22]") then
-    vim.cmd("normal! <Esc>")
+local function open_rename_substitute(target, exit_visual)
+  if not target or target == "" then
+    vim.notify("No hay palabra o selección para reemplazar", vim.log.levels.WARN)
+    return
   end
 
-  vim.fn.feedkeys(":%s/" .. pattern .. "/", "n")
-end, { desc = "Rename Symbols" })
+  local command = ":%s/" .. escape_for_substitute(target) .. "/"
+  local keys = command
+
+  if exit_visual then
+    keys = vim.api.nvim_replace_termcodes("<Esc>", true, false, true) .. keys
+  end
+
+  -- nvim_input preserves the interactive command-line flow so the user can
+  -- type the replacement normally and confirm it with <Enter>.
+  vim.api.nvim_input(keys)
+end
+
+map("n", "<leader>rr", function()
+  open_rename_substitute(vim.fn.expand("<cword>"), false)
+end, { desc = "Rename word in file" })
+
+map("x", "<leader>rr", function()
+  open_rename_substitute(get_current_visual_selection(), true)
+end, { desc = "Rename visual selection in file" })
 
 local function open_global_substitute(pattern)
   if not pattern or pattern == "" then
@@ -230,32 +256,22 @@ local function open_global_substitute(pattern)
   vim.api.nvim_input(cmd)
 end
 
-map("n", "<A-s>", ":%s/", { desc = "Global substitute" })
+-- Alt+s: bloque anterior de mini.diff; carga el plugin antes de navegar.
+map({ "n", "x" }, "<A-s>", function()
+  require("lazy").load({ plugins = { "mini.diff" } })
+  require("mini.diff").goto_hunk("prev")
+end, { desc = "MiniDiff: bloque anterior" })
 
 map("n", "<A-d>", function()
   local word = vim.fn.expand("<cword>")
   open_global_substitute(word)
 end, { desc = "Global substitute current word" })
 
-map({ "n", "v" }, "<A-f>", function()
-  local mode = vim.fn.mode()
-  if not mode:match("[vV\22]") then
-    open_global_substitute(nil)
-    return
-  end
-
-  local saved = vim.fn.getreg("z")
-  local saved_type = vim.fn.getregtype("z")
-
-  vim.cmd('normal! "zy')
-  local selected = vim.fn.getreg("z")
-  vim.fn.setreg("z", saved, saved_type)
-
-  local escaped = "\\V" .. selected:gsub("\\", "\\\\"):gsub("/", "\\/"):gsub("\n", "\\n")
-  local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-  vim.api.nvim_input(esc)
-  open_global_substitute(escaped)
-end, { desc = "Global substitute visual selection" })
+-- Alt+f: bloque siguiente de mini.diff, sin sustituir texto ni entrar en insercion.
+map({ "n", "x" }, "<A-f>", function()
+  require("lazy").load({ plugins = { "mini.diff" } })
+  require("mini.diff").goto_hunk("next")
+end, { desc = "MiniDiff: bloque siguiente" })
 
 -- toggleterm keymaps
 set_keymap("n", "<leader>ls", ":ToggleTerm direction=vertical<CR>", { noremap = true, silent = true })

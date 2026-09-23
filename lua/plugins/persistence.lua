@@ -19,7 +19,7 @@ return {
         end
 
         -- Skip when opening files explicitly (e.g. `nvim file1 file2`).
-        if vim.fn.argc(-1) > 0 then
+        if vim.fn.argc(-1) > 0 or vim.v.this_session ~= '' then
           return
         end
 

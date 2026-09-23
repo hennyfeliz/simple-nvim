@@ -62,12 +62,22 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePre" }, {
       return
     end
 
-    -- si hay CR literales (mostrados como ^M), eliminarlos
-    local view = vim.fn.winsaveview()
-    vim.api.nvim_buf_call(buffer, function()
-      vim.cmd([[%s/\r$//e]])
-    end)
-    vim.fn.winrestview(view)
+    -- Si hay CR literales (mostrados como ^M), quitarlos en un solo cambio.
+    -- Una sustitución de Vim emite un cambio por línea y puede romper la
+    -- sincronización incremental de LSP al recargar un archivo externamente.
+    local lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
+    local changed = false
+    for index, line in ipairs(lines) do
+      local cleaned_line = line:gsub("\r$", "")
+      if cleaned_line ~= line then
+        lines[index] = cleaned_line
+        changed = true
+      end
+    end
+
+    if changed then
+      vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
+    end
   end,
   desc = "Forzar finales de línea LF y limpiar ^M",
 })
@@ -117,6 +127,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- 2. Load your plugins (defined in lua/plugins.lua)
+require("restart")
+require("commitAi")
 require("plugins")
 require("keymaps")
 require("config")
