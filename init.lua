@@ -31,9 +31,10 @@ end
 -- cursor config
 vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver50,r-cr:hor20,o:hor50"
 
--- EOL: usar LF siempre y detectar CRLF al abrir
+-- Leer como DOS retira los CR finales incluso si el archivo mezcla LF y CRLF.
+-- BufReadPost cambia el formato a Unix para guardar siempre con LF.
 vim.opt.fileformat = "unix"
-vim.opt.fileformats = { "unix", "dos" }
+vim.opt.fileformats = { "dos" }
 
 -- Fuerza LF y elimina ^M (carriage return) en lectura/escritura
 local fix_crlf_group = vim.api.nvim_create_augroup("FixCRLF", { clear = true })
@@ -46,40 +47,74 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePre" }, {
       return
     end
 
-    local was_dos = vim.bo[buffer].fileformat == "dos"
     -- siempre guardar como LF
     vim.bo[buffer].fileformat = "unix"
 
-    -- En guardado normal Neovim ya mantiene LF; sólo hay que revisar CR si el
-    -- archivo se leyó como DOS/CRLF. Esto evita un regex global en cada save.
-    if args.event == "BufWritePre" and not was_dos then
+    -- No cambiar líneas durante BufReadPost: la recarga todavía puede estar
+    -- notificando sus cambios al LSP, y otro cambio rompe su diff incremental.
+    -- fileformat=unix basta para guardar con LF incluso tras leer CRLF.
+    if args.event == "BufReadPost" then
       return
     end
 
-    -- No hagas una sustitución global en buffers enormes: además de ser cara,
-    -- puede bloquear la interfaz durante la lectura de logs/generados.
-    if vim.api.nvim_buf_line_count(buffer) > 100000 then
-      return
-    end
-
-    -- Si hay CR literales (mostrados como ^M), quitarlos en un solo cambio.
-    -- Una sustitución de Vim emite un cambio por línea y puede romper la
-    -- sincronización incremental de LSP al recargar un archivo externamente.
-    local lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
-    local changed = false
-    for index, line in ipairs(lines) do
-      local cleaned_line = line:gsub("\r$", "")
-      if cleaned_line ~= line then
-        lines[index] = cleaned_line
-        changed = true
+    local function clean_lines()
+      if not vim.api.nvim_buf_is_valid(buffer) or not vim.api.nvim_buf_is_loaded(buffer)
+        or vim.api.nvim_buf_line_count(buffer) > 100000 then
+        return
+      end
+      local lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
+      local changed = false
+      for index, line in ipairs(lines) do
+        local cleaned_line = line:gsub("\r$", "")
+        if cleaned_line ~= line then
+          lines[index] = cleaned_line
+          changed = true
+        end
+      end
+      if changed then
+        vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
       end
     end
 
-    if changed then
-      vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
-    end
+    clean_lines()
   end,
   desc = "Forzar finales de línea LF y limpiar ^M",
+})
+
+-- :checktime reutiliza el fileformat=unix del buffer existente al recargar.
+-- Si el editor externo escribió CRLF, releer con ++ff=dos quita los CR durante
+-- la lectura nativa, sin editar líneas desde BufReadPost mientras LSP sincroniza.
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  group = fix_crlf_group,
+  callback = function(args)
+    local buffer = args.buf
+    if not vim.api.nvim_buf_is_valid(buffer) or not vim.api.nvim_buf_is_loaded(buffer)
+      or vim.bo[buffer].buftype ~= "" or vim.bo[buffer].binary
+      or vim.bo[buffer].modified or vim.api.nvim_buf_line_count(buffer) > 100000 then
+      return
+    end
+    local has_cr = false
+    for _, line in ipairs(vim.api.nvim_buf_get_lines(buffer, 0, -1, false)) do
+      if line:sub(-1) == "\r" then
+        has_cr = true
+        break
+      end
+    end
+    if not has_cr then
+      return
+    end
+    local tick = vim.api.nvim_buf_get_changedtick(buffer)
+    vim.schedule(function()
+      if not vim.api.nvim_buf_is_valid(buffer) or not vim.api.nvim_buf_is_loaded(buffer)
+        or vim.bo[buffer].modified or vim.api.nvim_buf_get_changedtick(buffer) ~= tick then
+        return
+      end
+      vim.api.nvim_buf_call(buffer, function()
+        vim.cmd("edit ++ff=dos")
+      end)
+    end)
+  end,
+  desc = "Releer CRLF externo sin alterar el buffer durante BufReadPost",
 })
 
 -- Marca buffers grandes antes de que los plugins de sintaxis/LSP intenten
