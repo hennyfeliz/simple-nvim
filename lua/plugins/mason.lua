@@ -57,11 +57,12 @@ return {
 
       -- Analyzers (Java)
       local base = mason_root .. "/packages/sonarlint-language-server/extension/analyzers"
-      local jars = vim.fn.glob(base .. "/sonarjava-*.jar", 1, 1) or {}
+      local jars = vim.fn.glob(base .. "/sonarjava*.jar", 1, 1) or {}
       if #jars > 0 then
-        local sep = (vim.loop.os_uname().sysname == 'Windows_NT') and ';' or ':'
         table.insert(cmd, "-analyzers")
-        table.insert(cmd, table.concat(jars, sep))
+        for _, jar in ipairs(jars) do
+          table.insert(cmd, jar)
+        end
       end
 
       return cmd
@@ -99,6 +100,7 @@ return {
       vim.api.nvim_buf_call(bufnr, function()
         vim.lsp.start({
           name = "sonarlint",
+          init_options = { productKey = "neovim", workspaceName = "PC2", productName = "Neovim", productVersion = tostring(vim.version()), showVerboseLogs = false },
           cmd = cmd,
           root_dir = root,
           filetypes = { "java" },

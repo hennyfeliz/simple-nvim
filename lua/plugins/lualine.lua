@@ -1,7 +1,7 @@
 -- lua/plugins/lualine.lua
 return {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "nvim-tree/nvim-web-devicons" },
+  dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin" },
   event = "VeryLazy",
   config = function()
     local lualine = require("lualine")
@@ -41,7 +41,7 @@ return {
       options = {
         component_separators = '',
         section_separators   = '',
-        theme = 'catppuccin',
+        theme = 'catppuccin-nvim',
       },
       sections = {
         lualine_a = {},
