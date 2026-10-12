@@ -38,6 +38,7 @@ return {
         -- 1) Inicializa nvim-java (STS4, debug, test, etc.)
         -- Desactivamos spring-boot-tools por incompatibilidad de bundles en este entorno.
         require("java").setup({
+            jdk = vim.fn.has("win32") == 0 and { auto_install = false, path = "/usr/lib/jvm/java-25-openjdk" } or nil,
             spring_boot_tools = {
                 enable = false,
             },
@@ -72,6 +73,9 @@ return {
             local java_home = vim.env.JAVA_HOME
             if java_home and java_home:match("21") then
                 return java_home
+            end
+            if vim.fn.isdirectory("/usr/lib/jvm/java-21-openjdk") == 1 then
+                return "/usr/lib/jvm/java-21-openjdk"
             end
             -- Windows: buscar instalaciones comunes
             if vim.fn.has("win32") == 1 then
@@ -210,16 +214,13 @@ return {
             return updated
         end
 
-        local base_jdtls = {}
-        do
-            local ok_server, server = pcall(require, "java-core.ls.servers.jdtls")
-            if ok_server and server and type(server.get_config) == "function" then
-                base_jdtls = server.get_config({
-                    root_markers = java_root_markers,
-                    jdtls_plugins = { "java-test", "java-debug-adapter" },
-                    use_mason_jdk = true,
-                }) or {}
-            end
+        local base_jdtls = vim.deepcopy(vim.lsp.config.jdtls)
+        -- Current nvim-java exposes a command factory; resolve its arguments
+        -- before applying this configuration's memory and workspace limits.
+        if type(base_jdtls.cmd) == "function" then
+            local command = require("java-core.ls.servers.jdtls.cmd")
+            local java_config = vim.g.nvim_java_config
+            base_jdtls.cmd = command.get_jvm_args(java_config):concat(command.get_jar_args(java_config))
         end
         base_jdtls.cmd = cap_jdtls_memory(base_jdtls.cmd)
 

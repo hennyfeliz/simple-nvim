@@ -1,10 +1,11 @@
 -- nvim treesitter
 return {
   "nvim-treesitter/nvim-treesitter",
+  branch = "master",
   event = { "BufReadPre", "BufNewFile" },
   build = ":TSUpdate",
   config = function()
-    require("nvim-treesitter.install").compilers = { "zig" }
+    require("nvim-treesitter.install").compilers = vim.fn.has("win32") == 1 and { "zig" } or { "gcc", "clang" }
     local configs = require("nvim-treesitter.configs")
 
     configs.setup({

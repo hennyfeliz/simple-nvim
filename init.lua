@@ -142,7 +142,9 @@ vim.o.relativenumber = true
 vim.opt.swapfile = false
 vim.opt.shadafile = 'NONE'
 
-vim.env.PATH = "C:/Users/henny/scoop/persist/nodejs/bin;" .. vim.env.PATH
+if vim.fn.has("win32") == 1 then
+  vim.env.PATH = "C:/Users/henny/scoop/persist/nodejs/bin;" .. vim.env.PATH
+end
 
 -- ~/.config/nvim/init.lua
 
@@ -213,6 +215,7 @@ vim.opt.wrap = true
 
 -- Windows clipboard provider (clip.exe + PowerShell)
 -- Sin esto, "+y nunca llegaría al portapapeles del sistema en Windows
+if vim.fn.has("win32") == 1 then
 vim.g.clipboard = {
   name = 'win-clipboard',
   copy = {
@@ -225,6 +228,7 @@ vim.g.clipboard = {
   },
   cache_enabled = true,
 }
+end
 
 function get_visual_selection()
   -- Save current register
