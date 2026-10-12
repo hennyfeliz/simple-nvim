@@ -80,5 +80,24 @@ return {
         },
       },
     }
+    -- Solo estos buscadores: nombre visible sin alterar ruta ni coordenadas.
+    opts.pickers = opts.pickers or {}
+    for _, picker in ipairs({ "find_files", "live_grep" }) do
+      opts.pickers[picker] = vim.tbl_deep_extend("force", opts.pickers[picker] or {}, {
+        layout_config = { preview_width = 0.7 },
+        preview = { filesize_limit = false, timeout = false },
+        entry_index = {
+          display = function(entry)
+            return vim.fn.fnamemodify(entry.filename, ":t")
+          end,
+        },
+      })
+    end
+    -- Find Files filtra por nombre y extensión, sin incluir directorios.
+    opts.pickers.find_files.entry_index.ordinal = function(entry)
+      return vim.fn.fnamemodify(entry.filename, ":t")
+    end
+    -- Live Grep busca contenido; el refinamiento también excluye la ruta.
+    opts.pickers.live_grep.only_sort_text = true
     end,
 }
