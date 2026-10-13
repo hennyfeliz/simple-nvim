@@ -215,12 +215,31 @@ return {
         end
 
         local base_jdtls = vim.deepcopy(vim.lsp.config.jdtls)
-        -- Current nvim-java exposes a command factory; resolve its arguments
-        -- before applying this configuration's memory and workspace limits.
+        -- Resolver la API disponible antes de aplicar límites y workspace.
         if type(base_jdtls.cmd) == "function" then
-            local command = require("java-core.ls.servers.jdtls.cmd")
             local java_config = vim.g.nvim_java_config
-            base_jdtls.cmd = command.get_jvm_args(java_config):concat(command.get_jar_args(java_config))
+            local has_command, command = pcall(require, "java-core.ls.servers.jdtls.cmd")
+            if has_command then
+                base_jdtls.cmd = command.get_jvm_args(java_config):concat(command.get_jar_args(java_config))
+            else
+                -- Versiones anteriores integran cmd y bundles en get_config.
+                local bundles = {}
+                for option, package_name in pairs({
+                    java_test = "java-test",
+                    java_debug_adapter = "java-debug-adapter",
+                    spring_boot_tools = "spring-boot-tools",
+                }) do
+                    if java_config[option] and java_config[option].enable then
+                        table.insert(bundles, package_name)
+                    end
+                end
+                local legacy = require("java-core.ls.servers.jdtls").get_config({
+                    root_markers = java_config.root_markers,
+                    jdtls_plugins = bundles,
+                    use_mason_jdk = false,
+                })
+                base_jdtls = vim.tbl_deep_extend("force", base_jdtls, legacy)
+            end
         end
         base_jdtls.cmd = cap_jdtls_memory(base_jdtls.cmd)
 

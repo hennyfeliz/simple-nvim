@@ -14,7 +14,42 @@ return {
         enabled = true,
         timeout = 3000,
       },
-      picker = { enabled = true },
+      picker = {
+        enabled = true,
+        sources = {
+          notifications = {
+            -- El finder entrega primero las notificaciones más recientes.
+            sort = { fields = { "idx" } },
+            layout = { reverse = false, fullscreen = true },
+            confirm = function(picker, item)
+              if not item then return end
+              local notification = item.item
+              picker:close()
+              vim.schedule(function()
+                local buf = vim.api.nvim_create_buf(true, true)
+                local lines = {
+                  os.date("%Y-%m-%d %H:%M:%S", notification.added)
+                    .. " [" .. notification.level .. "] " .. (notification.title or ""),
+                  "",
+                }
+                vim.list_extend(lines, vim.split(notification.msg, "\n", { plain = true }))
+                vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+                vim.api.nvim_set_current_buf(buf)
+                vim.bo[buf].filetype = "log"
+                vim.bo[buf].modifiable = false
+                vim.bo[buf].bufhidden = "wipe"
+                vim.wo.wrap = true
+                vim.keymap.set("n", "<leader>y", function()
+                  vim.fn.setreg("+", table.concat(lines, "\n"))
+                end, { buffer = buf, desc = "Copiar notificación completa" })
+                vim.keymap.set("n", "q", "<cmd>bdelete<cr>", {
+                  buffer = buf, desc = "Cerrar detalle de notificación",
+                })
+              end)
+            end,
+          },
+        },
+      },
       quickfile = { enabled = true },
       scope = { enabled = false },
       scroll = { enabled = false },
@@ -110,7 +145,6 @@ return {
       { "<leader>Z",       function() Snacks.zen.zoom() end,                                       desc = "Toggle Zoom" },
       { "<leader>.",       function() Snacks.scratch() end,                                        desc = "Toggle Scratch Buffer" },
       { "<leader>S",       function() Snacks.scratch.select() end,                                 desc = "Select Scratch Buffer" },
-      { "<leader>n",       function() Snacks.notifier.show_history() end,                          desc = "Notification History" },
       { "<leader>bd",      function() Snacks.bufdelete() end,                                      desc = "Delete Buffer" },
       { "<leader>cR",      function() Snacks.rename.rename_file() end,                             desc = "Rename File" },
       { "<leader>gB",      function() Snacks.gitbrowse() end,                                      desc = "Git Browse",               mode = { "n", "v" } },
